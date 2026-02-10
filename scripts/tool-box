@@ -1,6 +1,6 @@
 #!/bin/bash
 # ┌───────────────────────────────────────────────────────┐
-# │ Type / Version : bash / 1.0.0.0-live                  │
+# │ Type / Version : 2026.02.10-01                        │
 # │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
 # │ Script Purpose : Toolbox Index                        │
 # │ Package        : toolbox                              │
@@ -11,35 +11,74 @@
 #
 # Examples:
 #   tool-box
-#   tool-box tool-diag
-#   tool-box tool-update
+#   tool-box diag
+#   tool-box update
 #
 # Description:
-#   Lists all available tools in the Kali Toolbox with version info.
-#   If a tool name is provided, displays its embedded help block.
-#   Parses help blocks using comment markers.
+#   Lists all available tools across supported languages:
+#     - Bash   → /usr/local/bin/bash
+#     - Python → /usr/local/bin/python
+#     - PHP    → /usr/local/bin/php
+#
+#   Displays Script Purpose and Version extracted from each tool’s
+#   embedded help block.
+#
+#   If a Bash tool name is provided, its detailed help block is shown.
+#   (Python and PHP tools use their own -h or --help flags.)
+#
 # End Help
 
-TOOL_DIR="/usr/local/bin"
-TOOL_PREFIX="tool-"
+TOOL_ROOT="/usr/local/bin"
+LANG_DIRS=("bash" "python" "php")
 
+# ────────────────────────────────────────────────────────────────
+# No argument → list all tools by language
+# ────────────────────────────────────────────────────────────────
 if [ -z "$1" ]; then
-  echo "Available Tools in Kali Toolbox:"
-  for file in $TOOL_DIR/${TOOL_PREFIX}*; do
-    name=$(basename "$file")
-    # Strip trailing pipes and whitespace
-    purpose=$(grep -m1 "^#.*Script Purpose" "$file" | cut -d':' -f2- | sed 's/^ *//;s/ *$//;s/│$//;s/ *$//')
-    version=$(grep -m1 "^#.*Version" "$file" | cut -d':' -f2- | sed 's/^ *//;s/ *$//;s/│$//;s/ *$//')
-    # Format output
-    printf "%-15s : %-45s (Version: %s)\n" "$name" "$purpose" "$version"
-  done
-  echo -e "\nFor bash script detailed help use 'tool-box <tool-name>'."
-  echo -e "For python script detailed help use '<tool-name> -h'."
-else
-  target="$TOOL_DIR/$1"
-  if [ -f "$target" ]; then
+    echo "Available Tools:"
+    echo
+
+    for lang in "${LANG_DIRS[@]}"; do
+        DIR="$TOOL_ROOT/$lang"
+
+        [ -d "$DIR" ] || continue
+
+        echo "[$lang]"
+        for file in "$DIR"/*; do
+            [ -f "$file" ] || continue
+
+            name=$(basename "$file")
+
+            # Extract metadata
+            purpose=$(grep -m1 "^#.*Script Purpose" "$file" \
+                      | cut -d':' -f2- \
+                      | sed 's/^ *//;s/ *$//;s/│$//')
+
+            version=$(grep -m1 "^#.*Version" "$file" \
+                      | cut -d':' -f2- \
+                      | sed 's/^ *//;s/ *$//;s/│$//')
+
+            printf "  %-15s : %-45s (Version: %s)\n" \
+                   "$name" "$purpose" "$version"
+        done
+        echo
+    done
+
+    echo "For Bash tool help:   tool-box <tool-name>"
+    echo "For Python tools:     <tool-name> -h"
+    echo "For PHP tools:        <tool-name> -h"
+    exit 0
+fi
+
+# ────────────────────────────────────────────────────────────────
+# Argument provided → show help for Bash tools only
+# ────────────────────────────────────────────────────────────────
+target="$TOOL_ROOT/bash/$1"
+
+if [ -f "$target" ]; then
     awk '/^# ┌/,/^# End Help/' "$target" | sed 's/^# //'
-  else
-    echo "Tool '$1' not found in $TOOL_DIR."
-  fi
+else
+    echo "Tool '$1' not found in $TOOL_ROOT/bash."
+fi
+
 fi
