@@ -1,0 +1,107 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Type / Version : bash / 2026.02.10-01                 │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : System Update & Locate DB Refresh    │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   sudo update [--dry-run] [--log] [--hashmap]
+#
+# Examples:
+#   sudo update --dry-run
+#   sudo update --log
+#   sudo update --hashmap
+#
+# Description:
+#   Performs a full system update using apt update, upgrade,
+#   autoremove, and clean. Refreshes the locate database for
+#   accurate file indexing. Supports dry-run simulation, logging
+#   to /var/log/update.log, and hash-based traceability.
+# End Help
+
+set -e
+
+LOG=false
+DRY_RUN=false
+HASHMAP=false
+LOGFILE="/var/log/update.log"
+
+# ─────────────────────────────────────────────────────────────
+# Parse command-line arguments
+# ─────────────────────────────────────────────────────────────
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --dry-run) DRY_RUN=true ;;
+        --log) LOG=true ;;
+        --hashmap) HASHMAP=true ;;
+        --help)
+            echo "Usage: update [--dry-run] [--log] [--hashmap]"
+            exit 0 ;;
+        *) echo "Unknown option: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# ─────────────────────────────────────────────────────────────
+# Define update steps
+# ─────────────────────────────────────────────────────────────
+steps=(
+    "apt update"
+    "apt upgrade -y"
+    "apt autoremove -y"
+    "apt clean"
+)
+
+echo "🔄 Starting update process..."
+for step in "${steps[@]}"; do
+    if $DRY_RUN; then
+        echo "[DRY-RUN] Would execute: $step"
+    else
+        echo "✅ Executing: $step"
+        eval "$step"
+    fi
+done
+
+# ─────────────────────────────────────────────────────────────
+# Refresh locate database
+# ─────────────────────────────────────────────────────────────
+if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: updatedb --verbose"
+else
+    echo "📚 Updating locate database..."
+    if $LOG; then
+        updatedb --verbose | tee -a "$LOGFILE"
+    else
+        updatedb --verbose
+    fi
+
+    echo "🔍 Verifying locate index freshness..."
+    stat -c '%y %n' /var/lib/plocate/plocate.db
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Optional logging summary block
+# ─────────────────────────────────────────────────────────────
+if $LOG && ! $DRY_RUN; then
+    echo "📝 Logging summary to $LOGFILE"
+    {
+        echo "=== update summary ==="
+        date
+        for step in "${steps[@]}"; do echo "$step"; done
+        echo "updatedb --verbose"
+        echo "======================="
+    } >> "$LOGFILE"
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Optional hash-based traceability
+# ─────────────────────────────────────────────────────────────
+if $HASHMAP; then
+    mkdir -p .hashmap
+    sha256sum "$0" > .hashmap/update.hash
+    date > .hashmap/update.timestamp
+fi
+
+echo "🎉 Update complete."
