@@ -1,0 +1,44 @@
+# ┌────────────────────────────────────────────────────────┐
+# │ Type / Version  : bash / 1.0.0.0-live                  │
+# │ Author          : Mark Hamilton & Co-Pilot AI assisted │
+# │ Script Purpose  : Boot-up Analysis tool                │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   tool-ba
+#
+# Description:
+#   This tool is designed to quickly Analyse the boot process.
+#   So if booting into Kali takes a while then use this tool to
+#   analtse then use AI to remedy the issue.
+# End Help
+# ─── Config ──────────────────────────────────────────────────
+LOG=~/Logs/kali-boot.log
+
+# ─── Main Logic ──────────────────────────────────────────────
+echo -e "Starting Kali Boot Analysis......"
+echo -e "Starting Kali Boot Analysis @ $(date)......" > $LOG
+ 
+echo -e "\n  User Manager Health Check..."
+echo -e "\n  User Manager Health Check..." >> $LOG
+systemctl --no-pager status user@$(id -u).service >> $LOG
+
+echo -e "\n  Summary..."
+echo -e "\n  Summary..." >> $LOG
+systemd-analyze --no-pager >> $LOG
+
+echo -e "\n  Critical Analysis..."
+echo -e "\n  Critical Analysis...(Critical-Chain)\n" >> $LOG
+systemd-analyze --no-pager critical-chain >> $LOG
+
+echo -e "\n  List Jobs..."
+echo -e "\n  Running Jobs...(List Jobs)\m" >> $LOG
+systemctl --no-pager list-jobs >> $LOG
+
+echo -e "\n  Detailed Analysis..."
+echo -e "\n  Detailed Analysis...(Blame)\n" >> $LOG
+systemd-analyze --no-pager blame >> $LOG
+
+echo -e "\n........Completed @ $(date)!" >> $LOG
+echo -e "\n........Completed!.  See $LOG for Results."
