@@ -1,23 +1,34 @@
 #!/bin/bash
 # ┌───────────────────────────────────────────────────────┐
-# │ Type / Version : bash / 1.0.0.0-live                  │
+# │ Type / Version : 2026.02.13-01                        │
 # │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
 # │ Script Purpose : Systems Diagnostics & health tool.   │
 # │ Package        : toolbox                              │
 # └───────────────────────────────────────────────────────┘
-# 
+#
 # Usage:
-#   tool-diag [--dry-run] [--log] [--hashmap] [--network]
-# 
+#   [sudo] diag [--dry-run] [--log] [--hashmap] [--network]
+#
 # Examples:
-#   tool-diag --dry-run
-#   tool-diag --log --network
-#   tool-diag --hashmap
-# 
+#   diag
+#   sudo diag
+#   diag --dry-run
+#   diag --log --network
+#   diag --hashmap
+#
 # Description:
-#   Performs system diagnostics including uptime, memory, disk, and service health.
-#   Optional flags enable dry-run simulation, logging to /var/log/tool-diag.log,
-#   network diagnostics, and hash-based traceability via .hashmap.
+#   Performs system diagnostics including uptime, memory, disk, and service
+#   health checks. Optional flags enable:
+#     • dry-run simulation
+#     • logging to /var/log/diag.log
+#     • network diagnostics
+#     • hash-based traceability via .hashmap/
+#
+# Output Files:
+#   /var/log/diag.log              (when --log is used)
+#   .hashmap/diag.hash             (when --hashmap is used)
+#   .hashmap/diag.timestamp        (when --hashmap is used)
+#
 # End Help
 
 set -e
@@ -34,7 +45,7 @@ while [[ "$#" -gt 0 ]]; do
         --hashmap) HASHMAP=true ;;
         --network) NETWORK=true ;;
         --help)
-            echo "Usage: tool-diag [--dry-run] [--log] [--hashmap] [--network]"
+            echo "Usage: diag [--dry-run] [--log] [--hashmap] [--network]"
             exit 0 ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
@@ -73,9 +84,10 @@ for check in "${diagnostics[@]}"; do
 done
 
 if $LOG && ! $DRY_RUN; then
-    echo "📝 Logging to /var/log/tool-diag.log"
+    LOGFILE="/var/log/diag.log"
+    echo "📝 Logging to $LOGFILE"
     {
-        echo "=== tool-diag ==="
+        echo "=== diag ==="
         date
         for check in "${diagnostics[@]}"; do
             echo "▶ $check"
@@ -83,12 +95,14 @@ if $LOG && ! $DRY_RUN; then
             echo ""
         done
         echo "========================"
-    } >> /var/log/tool-diag.log
+    } >> "$LOGFILE"
 fi
 
 if $HASHMAP; then
-    sha256sum "$0" > .hashmap/tool-diag.hash
-    date > .hashmap/tool-diag.timestamp
+    mkdir -p .hashmap
+    sha256sum "$0" > .hashmap/diag.hash
+    date > .hashmap/diag.timestamp
+    echo "🔐 Hashmap written to .hashmap/diag.hash and .hashmap/diag.timestamp"
 fi
 
 echo "✅ Diagnostics complete."
