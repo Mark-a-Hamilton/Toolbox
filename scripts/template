@@ -1,0 +1,103 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : YYYY.MM.DD-00                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : <REPLACE WITH PURPOSE>               │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   <toolname> [--dry-run] [--verbose] [--log] [--hashmap]
+#
+# Examples:
+#   <toolname>
+#   <toolname> --dry-run
+#   <toolname> --verbose --log
+#
+# Description:
+#   <REPLACE WITH A CLEAR DESCRIPTION OF THE TOOL>
+#
+# Output Files:
+#   /var/log/<toolname>.log            (when --log is used)
+#   .hashmap/<toolname>.hash           (when --hashmap is used)
+#   .hashmap/<toolname>.timestamp      (when --hashmap is used)
+#
+# End Help
+
+# ─── Metadata ─────────────────────────────────────────────
+TOOL_NAME="<toolname>"
+VERSION="YYYY.MM.DD-00"
+
+LOGFILE="/var/log/${TOOL_NAME}.log"
+HASHDIR=".hashmap"
+HASHFILE="${HASHDIR}/${TOOL_NAME}.hash"
+TIMESTAMP="${HASHDIR}/${TOOL_NAME}.timestamp"
+
+# ─── Flags ────────────────────────────────────────────────
+DRY_RUN=false
+VERBOSE=false
+LOGGING=false
+HASHMAP=false
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --verbose) VERBOSE=true ;;
+    --log) LOGGING=true ;;
+    --hashmap) HASHMAP=true ;;
+    --help)
+        echo "Usage: $TOOL_NAME [--dry-run] [--verbose] [--log] [--hashmap]"
+        exit 0 ;;
+    *) echo "[!] Unknown argument: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# ─── Helpers ──────────────────────────────────────────────
+log() { $VERBOSE && echo "[LOG] $1"; }
+
+run_step() {
+  local cmd="$1"
+  if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: $cmd"
+  else
+    log "Executing: $cmd"
+    eval "$cmd"
+  fi
+}
+
+# ─── Main Logic (Replace with your tool's functionality) ──
+main() {
+  log "Starting $TOOL_NAME version $VERSION"
+
+  echo "Hello from $TOOL_NAME!"
+  echo "Replace this block with your tool's logic."
+
+  # Example placeholder:
+  # run_step "echo 'Doing something important...'"
+}
+
+main
+
+# ─── Logging ──────────────────────────────────────────────
+if $LOGGING && ! $DRY_RUN; then
+  mkdir -p "$(dirname "$LOGFILE")"
+  echo "[*] Logging enabled → $LOGFILE"
+  {
+    echo "=== $TOOL_NAME ==="
+    date
+    echo "Version: $VERSION"
+    echo "Executed with flags: DRY_RUN=$DRY_RUN VERBOSE=$VERBOSE LOGGING=$LOGGING HASHMAP=$HASHMAP"
+    echo "===================="
+  } >> "$LOGFILE"
+fi
+
+# ─── Hashmap ──────────────────────────────────────────────
+if $HASHMAP; then
+  mkdir -p "$HASHDIR"
+  echo "[*] Generating traceability files..."
+  date +"%Y-%m-%d %H:%M:%S" > "$TIMESTAMP"
+  sha256sum "$0" > "$HASHFILE"
+  echo "[*] Timestamp → $TIMESTAMP"
+  echo "[*] Hash → $HASHFILE"
+fi
