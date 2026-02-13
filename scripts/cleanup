@@ -1,21 +1,30 @@
 #!/bin/bash
 # ┌───────────────────────────────────────────────────────┐
-# │ Type / Version : bash / 1.0.0.0-live                  │
+# │ Version        : 2026.02.13-01                        │
 # │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
-# │ Script Purpose : System maintenance & hygiene         │
+# │ Script Purpose : System maintenance & hygiene tool    │
 # │ Package        : toolbox                              │
 # └───────────────────────────────────────────────────────┘
-# 
+#
 # Usage:
-# tool-cleanup [--dry-run] [--verbose] [--log] [--hashmap]
-# 
+#   cleanup [--dry-run] [--log] [--hashmap]
+#
 # Examples:
-# tool-cleanup --dry-run
-# tool-cleanup --log
-# tool-cleanup --hashmap
-# 
+#   cleanup
+#   cleanup --dry-run
+#   cleanup --log
+#   cleanup --hashmap
+#
 # Description:
-# Cleans up unrequired files from the installation which can be expanded as required. 
+#   Performs general system maintenance by removing temporary files,
+#   clearing package caches, and cleaning unused dependencies.
+#   Designed to work across Debian-based systems (Ubuntu, Debian, Kali, etc.).
+#
+# Output Files:
+#   /var/log/cleanup.log           (when --log is used)
+#   .hashmap/cleanup.hash          (when --hashmap is used)
+#   .hashmap/cleanup.timestamp     (when --hashmap is used)
+#
 # End Help
 
 set -e
@@ -30,7 +39,7 @@ while [[ "$#" -gt 0 ]]; do
         --log) LOG=true ;;
         --hashmap) HASHMAP=true ;;
         --help)
-            echo "Usage: tool-cleanup [--dry-run] [--log] [--hashmap]"
+            echo "Usage: cleanup [--dry-run] [--log] [--hashmap]"
             exit 0 ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
@@ -44,7 +53,7 @@ steps=(
     "rm -rf /tmp/*"
 )
 
-echo "🧹 Starting Kali cleanup..."
+echo "🧹 Starting system cleanup..."
 for step in "${steps[@]}"; do
     if $DRY_RUN; then
         echo "[DRY-RUN] Would execute: $step"
@@ -55,18 +64,21 @@ for step in "${steps[@]}"; do
 done
 
 if $LOG && ! $DRY_RUN; then
-    echo "📝 Logging to /var/log/tool-cleanup.log"
+    LOGFILE="/var/log/cleanup.log"
+    echo "📝 Logging to $LOGFILE"
     {
-        echo "=== tool-cleanup ==="
+        echo "=== cleanup ==="
         date
         for step in "${steps[@]}"; do echo "$step"; done
         echo "===================="
-    } >> /var/log/tool-cleanup.log
+    } >> "$LOGFILE"
 fi
 
 if $HASHMAP; then
-    sha256sum "$0" > .hashmap/tool-cleanup.hash
-    date > .hashmap/tool-cleanup.timestamp
+    mkdir -p .hashmap
+    sha256sum "$0" > .hashmap/cleanup.hash
+    date > .hashmap/cleanup.timestamp
+    echo "🔐 Hashmap written to .hashmap/cleanup.hash and .hashmap/cleanup.timestamp"
 fi
 
 echo "🎉 Cleanup complete."
