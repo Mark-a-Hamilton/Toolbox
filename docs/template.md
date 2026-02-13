@@ -1,9 +1,7 @@
-# 🧰 tool-template
+# 🧰 template
 
-`tool-template` is the foundational scaffold for all future tools in the **Toolbox**.  
-It enforces consistent metadata, modular flag handling, predictable output behaviour, and seamless integration with `tool-box` indexing.
-
-This template ensures every new tool is clean, traceable, and operator‑grade from the moment it is created.
+`template` is the foundational scaffold for all future tools in the **Toolbox**.  
+It provides a clean, modular, and fully standardised starting point that ensures every new tool integrates seamlessly with the Toolbox architecture, metadata indexing, and operator‑grade workflow.
 
 ---
 
@@ -11,13 +9,13 @@ This template ensures every new tool is clean, traceable, and operator‑grade f
 
 This template is designed to:
 
-- Provide a consistent, ready‑to‑use starting point for new tools  
-- Embed standardized metadata for indexing and version tracking  
+- Provide a consistent structure for all new tools  
+- Embed standardised metadata for indexing and version tracking  
 - Support dry‑run, verbose, logging, and hash‑based audit modes  
 - Encourage modular, readable, maintainable tool design  
 - Enable AI‑assisted tool generation with minimal post‑editing  
 
-Every tool built from this template will automatically fit into the Toolbox ecosystem.
+Every tool created from this template will automatically conform to Toolbox standards.
 
 ---
 
@@ -25,15 +23,15 @@ Every tool built from this template will automatically fit into the Toolbox ecos
 
 To create a new tool:
 
-1. Copy the template to your new tool name:
+1. Copy the template:
    ```bash
-   cp tool-template <toolname>
+   cp template <toolname>
    ```
 
-2. Edit the metadata block:
+2. Update the metadata block:
    ```bash
-   # Script Purpose : <describe the tool>
    # Type / Version : bash / YYYY.MM.DD-00
+   # Script Purpose : <describe the tool>
    ```
 
 3. Replace `<toolname>` in:
@@ -98,7 +96,7 @@ The AI will return a fully structured script that already conforms to Toolbox st
 
 ## 🧭 Contributor Guidance
 
-- Always start from `tool-template`  
+- Always start from `template`  
 - Update the version using the Toolbox model:  
   ```
   YYYY.MM.DD-BUILD
@@ -120,4 +118,4 @@ This template was co‑authored with AI assistance.
 For details on ethical integration, traceability, and responsible authorship, see:  
 ethics_AI.md (github.com in Bing) (bing.com in Bing)
 
-🔙 Return to Toolbox [(bing.com in Bing)](https://www.bing.com/search?q="https%3A%2F%2Fwww.bing.com%2Fsearch%3Fq%3D%2522https%253A%252F%252Fgithub.com%252FMark-a-Hamilton%252FToolbox%2522")
+🔙 Return to Toolbox (bing.com in Bing) [(bing.com in Bing)](https://www.bing.com/search?q="https%3A%2F%2Fwww.bing.com%2Fsearch%3Fq%3D%2522https%253A%252F%252Fgithub.com%252FMark-a-Hamilton%252FToolbox%2522")
