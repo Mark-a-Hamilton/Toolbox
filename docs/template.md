@@ -112,10 +112,9 @@ The AI will return a fully structured script that already conforms to Toolbox st
 
 ---
 
-## 🤖 AI & Ethics Disclosure  
+## 🤖 AI & Ethics Disclosure
 
-This template was co‑authored with AI assistance.  
-For details on ethical integration, traceability, and responsible authorship, see:  
-ethics_AI.md (github.com in Bing) (bing.com in Bing)
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
 🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
