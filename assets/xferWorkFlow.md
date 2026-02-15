@@ -21,9 +21,9 @@ This diagram shows the full DFIR‑style remote workflow using `xfer`.
 ```mermaid
 flowchart TD
 
-    A["Start: Permission Granted by System Owner"] --> B["Establish Remote Access]\n[(xfer run 'uname -a')"]
-    B --> C["Upload DFIR Toolkit\n(e.g., LinSuite)\nxfer put LOCAL → REMOTE"]
-    C --> D["Execute Remote Analysis\nxfer run /tmp/LinSuite.sh"]
+    A["Start: Permission Granted by System Owner"] --> B["Establish Remote Access"]
+    B --> C["Upload DFIR Toolkit"]
+    C --> D["Execute Remote Analysis"]
     D --> E["Collect Evidence\nxfer get REMOTE → LOCAL"]
     E --> F["Verify Completion via Trigger Files\nxfer test /path/to/triggers EXPECTED"]
     F --> G["Perform Remote Cleanup\nxfer run 'rm -r /tmp/LinSuite*'"]
