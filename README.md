@@ -206,4 +206,4 @@ Contributions are welcome. Please ensure:
 
 # 📜 License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](https://github.com/Mark-a-Hamilton/Toolbox/edit/main/README.md)
