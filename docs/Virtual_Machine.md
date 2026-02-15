@@ -180,9 +180,9 @@ This is the intentional, repeatable path into your ecosystem.
 
 ---
 
-## 🤖 AI & Ethics Disclosure  
+## 🤖 AI & Ethics Disclosure
 
-This guide was co‑authored with AI assistance.  
-For details on ethical integration, traceability, and responsible authorship, see `ethics_AI.md`.
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
 🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
