@@ -1,0 +1,155 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Type / Version  : 2026.02.14-01                        │
+# │ Author          : Mark Hamilton & Copilot AI assisted  │
+# │ Script Purpose  : Remote transfer + execution utility  │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   xfer get  IP USER REMOTE_PATH [LOCAL_DEST] [FLAGS]
+#   xfer put  IP USER LOCAL_PATH  REMOTE_DEST [FLAGS]
+#   xfer run  IP USER REMOTE_COMMAND
+#   xfer test IP USER REMOTE_PATH EXPECTED_COUNT
+#
+# Examples:
+#   xfer get  10.10.10.10 mark /etc/passwd ~/Downloads
+#   xfer put  10.10.10.10 mark ./payload.sh /tmp '-r'
+#   xfer run  10.10.10.10 mark 'uname -a'
+#   xfer run  10.10.10.10 mark /tmp/payload.sh
+#   xfer test 10.10.10.10 mark . 2
+#
+# Description:
+#   A predictable remote‑operations wrapper providing:
+#     • bidirectional SCP file transfer (get/put)
+#     • remote command execution (run)
+#     • trigger‑file completion detection (test)
+#
+#   Subcommands:
+#     get   → pull from target to local
+#     put   → push from local to target
+#     run   → execute a remote command or script non‑interactively
+#     test  → count *.trg files in remote directory
+#
+#   Notes:
+#     • FLAGS are passed directly to scp (e.g. -r)
+#     • run streams stdout/stderr and returns remote exit code
+#     • run supports direct script execution (e.g. /tmp/payload.sh)
+#     • wildcards are supported but must exist in single quotes
+#       - put operation does not reliably support wildcards
+#       - Local targets must NOT be in quotes (e.g. LinSuite.*)
+#       - Remote targets MUST be in quotes (e.g. 'rm -r Lin*')
+#     • test returns:
+#         0 = expected triggers found
+#         1 = fewer than expected
+#         2 = none found
+#         3 = SSH failure
+#
+# End Help
+
+set -euo pipefail
+
+CMD="${1:-}"
+IP="${2:-}"
+USER="${3:-}"
+
+# ─── Help if no command ─────────────────────────────────────
+if [[ -z "$CMD" ]]; then
+    sed -n '1,/End Help/p' "$0"
+    exit 0
+fi
+
+# ─── Subcommand Dispatch ─────────────────────────────────────
+case "$CMD" in
+
+    # ─── GET ────────────────────────────────────────────────
+    get)
+        SRC="${4:-}"
+        DEST="${5:-$HOME/Downloads}"
+        FLAGS="${6:-}"
+
+        if [[ -z "$SRC" ]]; then
+            echo "Error: Missing REMOTE_PATH"
+            exit 1
+        fi
+
+        scp $FLAGS "${USER}@${IP}:${SRC}" "$DEST"
+        ;;
+
+    # ─── PUT ────────────────────────────────────────────────
+    put)
+        SRC="${4:-}"
+        DEST="${5:-}"
+        FLAGS="${6:-}"
+
+        if [[ -z "$SRC" || -z "$DEST" ]]; then
+            echo "Error: Missing LOCAL_PATH or REMOTE_DEST"
+            exit 1
+        fi
+
+        scp $FLAGS "$SRC" "${USER}@${IP}:${DEST}"
+        ;;
+
+    # ─── RUN ────────────────────────────────────────────────
+    run)
+        REMOTE_CMD="${4:-}"
+
+        if [[ -z "$REMOTE_CMD" ]]; then
+            echo "Error: Missing REMOTE_COMMAND"
+            exit 1
+        fi
+
+        # If the operator passes a script path, ensure it runs even if not executable
+        if [[ "$REMOTE_CMD" == /* ]]; then
+            ssh -o PreferredAuthentications=password,keyboard-interactive \
+                -o PubkeyAuthentication=no \
+                -o StrictHostKeyChecking=no \
+                "${USER}@${IP}" "chmod +x '$REMOTE_CMD' 2>/dev/null; '$REMOTE_CMD'"
+        else
+            ssh -o PreferredAuthentications=password,keyboard-interactive \
+                -o PubkeyAuthentication=no \
+                -o StrictHostKeyChecking=no \
+                "${USER}@${IP}" "$REMOTE_CMD"
+        fi
+
+        exit $?  # propagate remote exit code
+        ;;
+
+    # ─── TEST ───────────────────────────────────────────────
+    test)
+        TRG_DIR="${4:-}"
+        EXPECTED="${5:-}"
+
+        if [[ -z "$TRG_DIR" || -z "$EXPECTED" ]]; then
+            echo "Error: Usage: tool-xfer test IP USER TRIGGER_DIR EXPECTED_COUNT"
+            exit 1
+        fi
+
+        # Normalise path: ensure trailing slash
+        [[ "${TRG_DIR}" == */ ]] || TRG_DIR="${TRG_DIR}/"
+
+        # Build remote pattern safely
+        REMOTE_PATTERN="${TRG_DIR}*.trg"
+
+        # Count trigger files remotely
+        COUNT=$(ssh -o PreferredAuthentications=password,keyboard-interactive \
+                    -o PubkeyAuthentication=no \
+                    -o StrictHostKeyChecking=no \
+                    "${USER}@${IP}" "ls -1 '${REMOTE_PATTERN}' 2>/dev/null | wc -l") \
+                    || exit 3
+
+        if [[ "$COUNT" -eq "$EXPECTED" ]]; then
+            exit 0
+        elif [[ "$COUNT" -eq 0 ]]; then
+            exit 2
+        else
+            exit 1
+        fi
+        ;;
+
+    # ─── Unknown Command ─────────────────────────────────────
+    *)
+        echo "Error: Unknown command '$CMD'"
+        exit 1
+        ;;
+esac
