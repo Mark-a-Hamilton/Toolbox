@@ -1,0 +1,221 @@
+# 🧼 clean-lp — linPEAS Output Cleaning Tool  
+*A utility for stripping ANSI colour codes and invalid UTF‑8 from linPEAS logs*
+
+`clean-lp` is a lightweight operator tool designed to clean raw linPEAS output by removing ANSI escape sequences, colour codes, and invalid UTF‑8 bytes. The result is a clean, plain‑text file suitable for parsing, uploading, long‑term storage, or automated analysis.
+
+This document explains the tool’s purpose, how it works, when it is useful, and when alternatives may be more appropriate.
+
+---
+
+# 🎯 Purpose
+
+linPEAS is a powerful privilege‑escalation enumeration script, but its output is:
+
+- colourised  
+- full of ANSI escape codes  
+- sometimes contains invalid UTF‑8  
+- difficult to parse or upload  
+- messy when viewed in plain text editors  
+- problematic for automated tools or web‑based analyzers  
+
+`clean-lp` solves this by producing a **clean, analysis‑ready version** of the log.
+
+---
+
+# 🛠️ Usage
+
+```
+clean-lp <input-file> <output-file> [--dry-run] [--verbose]
+```
+
+### Examples
+
+```
+clean-lp linpeas.log linpeas_clean.log
+clean-lp linpeas.log linpeas_clean.log --verbose
+clean-lp linpeas.log linpeas_clean.log --dry-run
+```
+
+---
+
+# 🧩 What the Tool Actually Does
+
+`clean-lp` performs two operations:
+
+### **1. Strip ANSI escape codes**
+These include:
+
+- colour codes  
+- cursor movement  
+- formatting sequences  
+- terminal control characters  
+
+These sequences make raw linPEAS logs unreadable in plain text.
+
+### **2. Remove invalid UTF‑8 bytes**
+linPEAS output sometimes contains:
+
+- malformed characters  
+- broken byte sequences  
+- terminal artefacts  
+
+These can break:
+
+- web uploaders  
+- AI analysis tools  
+- parsers  
+- log processors  
+
+`clean-lp` sanitises the file so it is safe for any downstream tool.
+
+---
+
+# 🧭 When You Should Use This Tool
+
+### ✔ When you want a clean log for offline analysis  
+Plain‑text logs are easier to search, grep, and annotate.
+
+### ✔ When uploading linPEAS output to a website or AI tool  
+Some platforms reject ANSI‑encoded logs.
+
+### ✔ When storing linPEAS output as evidence  
+Clean logs are more stable for long‑term storage.
+
+### ✔ When feeding linPEAS output into automated parsers  
+Colour codes break most parsing logic.
+
+### ✔ When working in DFIR environments  
+ANSI output can contaminate evidence chains.
+
+---
+
+# 🧭 When You *Don’t* Need This Tool
+
+Your workflow has evolved — and this is important.
+
+You now:
+
+- run linPEAS  
+- copy/paste sections into a website or AI tool  
+- get a structured breakdown  
+- no longer rely on the raw `.log` file  
+
+In this workflow:
+
+### ❌ You do *not* need `clean-lp`  
+because you’re not uploading or parsing the raw log file.
+
+### ❌ You do *not* need to pre‑clean the output  
+because you’re analysing sections manually.
+
+### ❌ You do *not* need to store the cleaned log  
+because your analysis is interactive and section‑based.
+
+---
+
+# 🔄 Alternatives to Using `clean-lp`
+
+Here are the most common alternatives depending on the operator’s workflow.
+
+---
+
+## **1. Copy/paste sections into a website or AI tool**  
+This is your current workflow.
+
+Pros:  
+- fast  
+- interactive  
+- no need to clean logs  
+- no extra files  
+
+Cons:  
+- not suitable for automation  
+- not ideal for evidence storage  
+
+---
+
+## **2. Run linPEAS with `--no-colour`**
+
+```
+linpeas.sh --no-colour > output.log
+```
+
+Pros:  
+- avoids ANSI codes entirely  
+- no need for cleaning  
+
+Cons:  
+- still may contain invalid UTF‑8  
+- not all linPEAS versions support this flag  
+
+---
+
+## **3. Use `script` to capture clean output**
+
+```
+script -q -c "linpeas.sh" output.log
+```
+
+Pros:  
+- captures clean terminal output  
+- avoids some colour issues  
+
+Cons:  
+- still may include artefacts  
+- not as clean as `clean-lp`  
+
+---
+
+## **4. Use a web‑based linPEAS analyzer**  
+Some sites accept raw output and clean it automatically.
+
+Pros:  
+- no local cleaning needed  
+- instant analysis  
+
+Cons:  
+- not suitable for sensitive systems  
+- may violate evidence handling rules  
+
+---
+
+# 🩺 Troubleshooting
+
+### **Output file is empty**
+Check that the input file is not zero‑length.
+
+### **Output still contains colour codes**
+Some linPEAS versions use non‑standard escape sequences.  
+`clean-lp` handles the majority, but not all.
+
+### **Invalid UTF‑8 still appears**
+Ensure the input file was captured correctly:
+
+```
+linpeas.sh | tee linpeas.log
+```
+
+### **Permission denied**
+Ensure the output directory is writable.
+
+---
+
+# 🔗 Related Tools
+
+| Tool | Purpose |
+|------|---------|
+| `hash` | Create and verify MD5 hash files |
+| `cleanup` | System hygiene and temporary file cleanup |
+| `diag` | System diagnostics and environment checks |
+| `xfer` | Remote transfer + execution utility |
+| `mda4w` | Windows memory dump analysis |
+
+---
+
+## 🤖 AI & Ethics Disclosure
+
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
+
+🔙 Return to Toolbox (GitHub)
+Just tell me which one you want to tackle next.
