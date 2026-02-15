@@ -1,0 +1,40 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Version         : 2026.02.15-01                        │
+# │ Author          : Mark Hamilton & Copilot AI assisted  │
+# │ Script Purpose  : Ensure PostgreSQL service is running │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   pgsql-state
+#
+# Description:
+#   Checks whether the PostgreSQL service is active. If it is
+#   not running, the tool starts the service and waits briefly
+#   to ensure it becomes ready. If PostgreSQL is already
+#   running, the tool reports its state and exits cleanly.
+#
+# Examples:
+#   pgsql-state
+#
+# End Help
+
+set -euo pipefail
+
+SERVICE="postgresql"
+
+echo "[pgsql-state] Checking PostgreSQL service state…"
+
+# Check if PostgreSQL is active
+if ! systemctl is-active --quiet "$SERVICE"; then
+    echo "[pgsql-state] PostgreSQL is not running — starting service…"
+    sudo systemctl start "$SERVICE"
+
+    # Optional: wait a moment to ensure it's ready
+    sleep 2
+
+    echo "[pgsql-state] PostgreSQL service started."
+else
+    echo "[pgsql-state] PostgreSQL is already running."
+fi
