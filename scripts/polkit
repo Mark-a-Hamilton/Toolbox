@@ -1,0 +1,84 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Version         : 2026.02.15-01                        │
+# │ Author          : Mark Hamilton & Copilot AI assisted  │
+# │ Script Purpose  : Toggle polkit service state          │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   sudo polkit [--dry-run] [--verbose]
+#
+# Examples:
+#   sudo polkit
+#   sudo polkit --dry-run
+#   sudo polkit --verbose
+#
+# Description:
+#   Toggles the polkit service between:
+#     • active → stopped + masked
+#     • masked → unmasked + started
+#     • inactive (not masked) → started
+#
+#   Useful for keeping the system lean by disabling polkit
+#   when not required, while allowing on‑demand privilege
+#   escalation when needed.
+#
+# End Help
+
+set -euo pipefail
+
+TOOL_NAME="polkit"
+VERSION="2026.02.15-01"
+DRY_RUN=false
+VERBOSE=false
+
+# ─── Parse Flags ─────────────────────────────────────────────
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) DRY_RUN=true ;;
+        --verbose) VERBOSE=true ;;
+        --help)
+            echo "Usage: $TOOL_NAME [--dry-run] [--verbose]"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg"
+            exit 1
+            ;;
+    esac
+done
+
+# ─── Helpers ─────────────────────────────────────────────────
+run_cmd() {
+    if $DRY_RUN; then
+        echo "[DRY-RUN] $*"
+    else
+        eval "$@"
+    fi
+}
+
+log() {
+    $VERBOSE && echo "[LOG] $1"
+}
+
+# ─── Main Logic ──────────────────────────────────────────────
+log "Running $TOOL_NAME version $VERSION"
+
+if systemctl is-active --quiet polkit.service; then
+    log "Polkit is active — preparing to stop and mask"
+    run_cmd "systemctl stop polkit.service"
+    run_cmd "systemctl mask polkit.service"
+    echo "[polkit] Polkit stopped and masked."
+
+elif systemctl is-enabled polkit.service 2>/dev/null | grep -q masked; then
+    log "Polkit is masked — preparing to unmask and start"
+    run_cmd "systemctl unmask polkit.service"
+    run_cmd "systemctl start polkit.service"
+    echo "[polkit] Polkit unmasked and started."
+
+else
+    log "Polkit is inactive but not masked — starting"
+    run_cmd "systemctl start polkit.service"
+    echo "[polkit] Polkit started."
+fi
