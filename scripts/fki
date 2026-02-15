@@ -1,0 +1,58 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.02.15-01                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : Full Kali Install (kali-linux-large) │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   fki
+#
+# Examples:
+#   fki
+#
+# Description:
+#   Installs the full Kali environment using the recommended
+#   'kali-linux-large' meta-package. This provides a complete,
+#   lean, and VM-friendly installation suitable for most users.
+#
+#   This tool assumes:
+#     • You have already run the Toolbox 'update' tool
+#     • You want a full working Kali desktop environment
+#
+# Output Files:
+#   None (installation output is printed to console)
+#
+# End Help
+
+set -e
+
+echo "──────────────────────────────────────────────"
+echo "🛠️  Full Kali Install (kali-linux-large)"
+echo "──────────────────────────────────────────────"
+echo ""
+echo "[Phase 1] Verifying system state..."
+echo "This tool assumes you have already run:"
+echo "    sudo update"
+echo ""
+
+# ─────────────────────────────────────────────
+# 🧰 Phase 2: Install Full Kali Suite (Large)
+# ─────────────────────────────────────────────
+echo "[Phase 2] Installing kali-linux-large..."
+sudo apt install -y kali-linux-large
+
+# ─────────────────────────────────────────────
+# 📋 Phase 3: Summary and Optional Reboot
+# ─────────────────────────────────────────────
+echo ""
+echo "──────────────────────────────────────────────"
+echo "🎉 Full Kali installation complete."
+echo "──────────────────────────────────────────────"
+echo ""
+read -p "Reboot now to load the full desktop environment? (y/n): " REBOOT
+
+if [[ "$REBOOT" == "y" ]]; then
+    sudo reboot
+fi
