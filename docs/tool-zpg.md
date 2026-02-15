@@ -50,3 +50,13 @@ For contributor standards and formatting, see: `tool-box.md`
 
 ## 🧭 Defensive Philosophy
 `tool-zpg` enforces a declarative, table-driven approach to firewall rule generation. It supports operational hygiene, auditability, and ethical boundaries in network defense.
+
+---
+
+## 🤖 AI & Ethics Disclosure
+
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
+
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
+
