@@ -15,7 +15,7 @@ This flowchart shows the complete environment‑creation process at a glance.
 ```mermaid
 flowchart TD
 
-    A[Start: Windows Host] --> B['Create VM\n(Hyper-V or WSL')]
+    A[Start: Windows Host] --> B["Create VM\n(Hyper-V or WSL)"]
     B --> C[Install Kali Minimal ISO]
     C --> D[Boot into Kali]
     D --> E[Copy Toolbox Tools<br>to /usr/local/bin/bash/python/php]
