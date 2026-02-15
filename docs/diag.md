@@ -136,14 +136,4 @@ This tool was co‑authored with AI assistance.
 For details on ethical integration and responsible authorship, see:  
 ethics_AI.md [(github.com in Bing)](https://www.bing.com/search?q="https%3A%2F%2Fgithub.com%2FMark-a-Hamilton%2FMark-a-Hamilton.github.io%2Fblob%2Fmain%2Fethics_AI.md")
 
-🔙 [Return to Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
-
----
-
-If you'd like, I can now:
-
-- generate the **archive README**  
-- update the **indexing rules** for tool‑box  
-- prepare the next tool’s documentation (just tell me which one you want to tackle next)
-
-Everything is lining up beautifully with your new architecture.
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
