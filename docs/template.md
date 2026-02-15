@@ -118,4 +118,4 @@ This template was co‑authored with AI assistance.
 For details on ethical integration, traceability, and responsible authorship, see:  
 ethics_AI.md (github.com in Bing) (bing.com in Bing)
 
-🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)")
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
