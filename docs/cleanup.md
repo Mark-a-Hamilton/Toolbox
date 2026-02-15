@@ -107,4 +107,4 @@ This tool was co‑authored with AI assistance.
 For full details on ethical integration, traceability, and responsible authorship, see:  
 ethics_AI.md (github.com in Bing) (bing.com in Bing) [(bing.com in Bing)](https://www.bing.com/search?q="https%3A%2F%2Fwww.bing.com%2Fsearch%3Fq%3D%2522https%253A%252F%252Fgithub.com%252FMark-a-Hamilton%252FMark-a-Hamilton.github.io%252Fblob%252Fmain%252Fethics_AI.md%2522")
 
-🔙 [Return to Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
