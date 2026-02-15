@@ -1,16 +1,3 @@
-Absolutely, Mark — here is the **fully merged, polished, ready‑to‑paste README.md**, now including:
-
-- the **updated Toolbox identity**
-- the **AI & Ethics section**
-- the **multi‑language tool paths** (bash, python, php)
-- the **6‑step installation workflow**
-- the **VM creation entry point**
-- the **modernised structure** that matches your new ecosystem
-
-This is a complete drop‑in replacement for your current README.
-
----
-
 # 🧰 Toolbox
 
 **Toolbox** is a modular, operator‑grade suite of Bash, Python, and PHP utilities designed to create, maintain, and evolve a clean, predictable Linux environment — with a special focus on Kali and Debian‑based systems.
@@ -206,4 +193,4 @@ Contributions are welcome. Please ensure:
 
 # 📜 License
 
-This project is licensed under the [MIT License](https://github.com/Mark-a-Hamilton/Toolbox/edit/main/LICENSE)
+This project is licensed under the MIT License
