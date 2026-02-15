@@ -1,0 +1,81 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Version         : 2026.02.15-01                        │
+# │ Author          : Mark Hamilton & Copilot AI assisted  │
+# │ Script Purpose  : Create and verify MD5 hash files     │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   hash <image_filename> [hash_filename]
+#
+# Examples:
+#   hash disk.img                     # Creates disk.img.md5
+#   hash disk.img disk.img.md5        # Verifies image
+#
+# Description:
+#   A simple operator-grade tool for generating and verifying
+#   MD5 hash files. If only an image filename is supplied,
+#   the tool generates <image>.md5. If a hash file is also
+#   supplied, the tool verifies the image against it.
+#
+#   Mode 1: Create MD5 hash file
+#   Mode 2: Verify image against existing hash file
+#
+# End Help
+
+set -euo pipefail
+
+IMAGE_FILE="${1:-}"
+HASH_FILE="${2:-}"
+
+# ─── Input Validation ─────────────────────────────────────────
+if [[ -z "$IMAGE_FILE" ]]; then
+    echo "[hash] Error: No image file supplied."
+    echo "Usage: hash <image_filename> [hash_filename]"
+    exit 1
+fi
+
+if [[ ! -f "$IMAGE_FILE" ]]; then
+    echo "[hash] Error: Image file '$IMAGE_FILE' not found."
+    exit 1
+fi
+
+# ─── Mode 1: Generate hash file ───────────────────────────────
+if [[ -z "$HASH_FILE" ]]; then
+    OUTPUT="${IMAGE_FILE}.md5"
+    echo "[hash] Generating MD5 hash for '$IMAGE_FILE'..."
+    md5sum "$IMAGE_FILE" > "$OUTPUT"
+    chmod 444 "$OUTPUT"
+    echo "[hash] Hash saved to '$OUTPUT'"
+    exit 0
+fi
+
+# ─── Mode 2: Verify against existing hash file ────────────────
+if [[ ! -f "$HASH_FILE" ]]; then
+    echo "[hash] Error: Hash file '$HASH_FILE' not found."
+    exit 1
+fi
+
+echo "[hash] Verifying '$IMAGE_FILE' against '$HASH_FILE'..."
+TEMP_HASH="$(mktemp)"
+
+md5sum "$IMAGE_FILE" > "$TEMP_HASH"
+
+echo ""
+echo "Source hash file:"
+cat "$HASH_FILE"
+
+echo ""
+echo "Current image hash:"
+cat "$TEMP_HASH"
+
+echo ""
+echo "[hash] Comparing hashes..."
+if cmp -s "$HASH_FILE" "$TEMP_HASH"; then
+    echo "✅ Hashes match — image integrity verified."
+else
+    echo "⚠️ Hash mismatch — image may be altered or corrupted."
+fi
+
+rm -f "$TEMP_HASH"
