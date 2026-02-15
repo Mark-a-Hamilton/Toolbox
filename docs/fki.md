@@ -149,10 +149,9 @@ It is intended for:
 
 ---
 
-## 🤖 AI & Ethics Disclosure  
+## 🤖 AI & Ethics Disclosure
 
-This tool and documentation were co‑authored with AI assistance.  
-For details on ethical integration and responsible authorship, see:  
-**ethics_AI.md** (github.com in Bing) (bing.com in Bing)
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
 🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
