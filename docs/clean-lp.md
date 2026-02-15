@@ -217,5 +217,4 @@ Ensure the output directory is writable.
 This tool and its documentation were co‑authored with AI assistance.  
 For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
-🔙 Return to Toolbox (GitHub)
-Just tell me which one you want to tackle next.
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
