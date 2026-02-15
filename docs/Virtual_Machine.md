@@ -185,4 +185,4 @@ This is the intentional, repeatable path into your ecosystem.
 This guide was co‑authored with AI assistance.  
 For details on ethical integration, traceability, and responsible authorship, see `ethics_AI.md`.
 
-🔙 Return to Toolbox  
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
