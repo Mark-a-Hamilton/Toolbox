@@ -162,4 +162,4 @@ because you are not uploading or parsing the raw `.log` file.
 This workflow asset was co‑authored with AI assistance.  
 For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
-🔙 Return to Toolbox (GitHub)
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
