@@ -1,0 +1,44 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Version         : 2026.02.15-01                        │
+# │ Author          : Mark Hamilton & Copilot AI assisted  │
+# │ Script Purpose  : Session-bound PostgreSQL wrapper     │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   pgsql-session [psql arguments]
+#
+# Description:
+#   Starts a dedicated PostgreSQL instance for the duration of
+#   the current session. When the user exits psql, the service
+#   is automatically stopped. This ensures PostgreSQL is only
+#   running when required, reducing resource usage and avoiding
+#   unnecessary background services.
+#
+#   This is especially useful in minimal environments, lab VMs,
+#   or DFIR workflows where PostgreSQL is not intended to run
+#   persistently.
+#
+# Examples:
+#   pgsql-session
+#   pgsql-session -d mydatabase
+#   pgsql-session -U analyst -h localhost
+#
+# End Help
+
+set -euo pipefail
+
+SERVICE="postgresql@18-main.service"
+
+echo "[pgsql-session] Starting PostgreSQL service for this session…"
+sudo systemctl start "$SERVICE"
+
+# Run psql in the foreground (blocking)
+echo "[pgsql-session] Launching psql…"
+psql "$@"
+
+echo "[pgsql-session] psql exited — stopping PostgreSQL service…"
+sudo systemctl stop "$SERVICE"
+
+echo "[pgsql-session] PostgreSQL session complete."
