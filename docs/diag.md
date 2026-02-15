@@ -130,10 +130,9 @@ The tool remains fully human‑auditable and transparent.
 
 ---
 
-## 🤖 AI & Ethics Disclosure  
+## 🤖 AI & Ethics Disclosure
 
-This tool was co‑authored with AI assistance.  
-For details on ethical integration and responsible authorship, see:  
-ethics_AI.md [(github.com in Bing)](https://www.bing.com/search?q="https%3A%2F%2Fgithub.com%2FMark-a-Hamilton%2FMark-a-Hamilton.github.io%2Fblob%2Fmain%2Fethics_AI.md")
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
 🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
