@@ -21,7 +21,7 @@ flowchart TD
     D --> E[Copy Toolbox Tools<br>to /usr/local/bin/bash/python/php]
     E --> F[Add Toolbox Paths<br>to ~/.bashrc]
     F --> G[Run update Tool]
-    G --> H[Run fki Tool<br>(Full Kali Install)]
+    G --> H["Run fki Tool\n(Full Kali Install)"]
     H --> I[Run update Again]
     I --> J[Full Kali Environment Ready]
 ```
