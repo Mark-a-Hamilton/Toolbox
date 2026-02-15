@@ -24,9 +24,9 @@ flowchart TD
     A["Start: Permission Granted by System Owner"] --> B["Establish Remote Access"]
     B --> C["Upload DFIR Toolkit"]
     C --> D["Execute Remote Analysis"]
-    D --> E["Collect Evidence\nxfer get REMOTE → LOCAL"]
-    E --> F["Verify Completion via Trigger Files\nxfer test /path/to/triggers EXPECTED"]
-    F --> G["Perform Remote Cleanup\nxfer run 'rm -r /tmp/LinSuite*'"]
+    D --> E["Collect Evidence"]
+    E --> F["Verify Completion via Trigger Files"]
+    F --> G["Perform Remote Cleanup"]
     G --> H["Disconnect\nRemote workflow complete"]
 ```
 
