@@ -1,6 +1,4 @@
-# 📐 **assets/isWorkflow.md — Injection Scanner Workflow Diagram**
-
-# Injection Scanner (is) — Engine Workflow Diagram
+# 📐 Injection Scanner (is) — Engine Workflow Diagram
 
 flowchart TD
 
