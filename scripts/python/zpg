@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+
+# ┌────────────────────────────────────────────────────────┐
+# │ Type / Version : 2026.02.17-01                         │
+# │ Tool Name      : zpg                                   │
+# │ Author         : Mark Hamilton (Co-Pilot assisted)     │
+# │ Script Purpose : VyOS Zone Pair Generator              │
+# │ Package        : toolbox                               │
+# └────────────────────────────────────────────────────────┘
+
+import csv
+import argparse
+import os
+import json
+
+DEFAULT_PROTOCOL_MAP = {
+    "HTTP":  {"protocol": "tcp", "port": 80},
+    "HTTPS": {"protocol": "tcp", "port": 443},
+    "ICMP":  {"protocol": "ipv4-icmp"},
+    "PING":  {"protocol": "ipv4-icmp"},
+    "DNS":   {"protocol": "udp", "port": 53},
+    "FTP":   {"protocol": "tcp", "port": 21},
+    "SSH":   {"protocol": "tcp", "port": 22},
+    "-":     {}
+}
+
+def load_protocols(path):
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f)
+    return DEFAULT_PROTOCOL_MAP
+
+def emit_rule(zone_a, zone_b, proto, action, default, proto_map, verbose, context_mode):
+    fw_name = f"{zone_a.lower()}-{zone_b.lower()}"
+    rules = []
+    logs = []
+
+    rules.append(f"name {fw_name} {{")
+    rules.append(f"  default-action {default.lower()}")
+    rules.append(f"  enable-default-log")
+    rules.append(f"  rule 1 {{ action accept state {{ established enable related enable }} }}")
+    rules.append(f"  rule 2 {{ action drop log enable state {{ invalid enable }} }}")
+
+    if proto != "-" and action != "-":
+        key = proto if context_mode else proto.upper()
+        mapping = proto_map.get(key, {})
+        if verbose:
+            logs.append(f"[INFO] Mapping {proto} -> {mapping}")
+
+        rules.append("  rule 100 {")
+        rules.append(f"    action {action.lower()}")
+        rules.append("    log enable")
+
+        if "protocol" in mapping:
+            rules.append(f"    protocol {mapping['protocol']}")
+        if "port" in mapping:
+            rules.append(f"    destination port {mapping['port']}")
+
+        rules.append("  }")
+
+    rules.append("}")
+    return fw_name, "\n".join(rules), "\n".join(logs)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate VyOS zone-policy and zone-pair firewall rules from a CSV definition file."
+    )
+    parser.add_argument("csv", help="Input CSV file containing zone and zone-pair definitions")
+    parser.add_argument("--protocols", default="protocols.json",
+                        help="Optional protocol map override (JSON file)")
+    parser.add_argument("--out", default="output",
+                        help="Output folder for generated rules and logs")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print generated rules instead of writing files")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Enable verbose logging")
+    parser.add_argument("--context-mode", action="store_true",
+                        help="Preserve literal protocol names (case-sensitive)")
+    args = parser.parse_args()
+
+    proto_map = load_protocols(args.protocols)
+
+    os.makedirs(f"{args.out}/rules", exist_ok=True)
+    os.makedirs(f"{args.out}/logs", exist_ok=True)
+
+    with open(args.csv) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if not row or row[0].lower() == "header":
+                continue
+
+            if row[0] == "Z":
+                zone, iface, default = row[1], row[2], row[3]
+                cmd = (
+                    f"set zone-policy zone {zone} interface {iface}\n"
+                    f"set zone-policy zone {zone} default-action {default.upper()}"
+                )
+
+                if args.dry-run:
+                    print(cmd)
+                else:
+                    with open(f"{args.out}/rules/{zone}.zone", "w") as zf:
+                        zf.write(cmd + "\n")
+
+            elif row[0] == "ZP":
+                zone_a, zone_b, proto, action, default = row[1:6]
+                fw_name, rules, logs = emit_rule(
+                    zone_a, zone_b, proto, action, default,
+                    proto_map, args.verbose, args.context_mode
+                )
+
+                if args.dry_run:
+                    print(rules)
+                    if args.verbose:
+                        print(logs)
+                else:
+                    with open(f"{args.out}/rules/{fw_name}.rules", "w") as rf:
+                        rf.write(rules + "\n")
+                    with open(f"{args.out}/logs/{fw_name}.log", "w") as lf:
+                        lf.write(logs + "\n")
+
+if __name__ == "__main__":
+    main()
