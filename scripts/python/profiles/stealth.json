@@ -1,0 +1,51 @@
+{
+  "name": "stealth",
+  "description": "Minimal, low-noise injection detection profile covering the most common and high-probability injection classes.",
+  "payloads": [
+    {
+      "payload": ";",
+      "modules": {
+        "DBI": [
+          ["SQL syntax", "SQL-based DB (MySQL/MariaDB)"],
+          ["You have an error in your SQL syntax", "MySQL/MariaDB"],
+          ["Unclosed quotation mark", "MSSQL"],
+          ["near 'SELECT'", "SQLite"],
+          ["Unknown column", "SQL-based DB"],
+          ["mysql_fetch_array()", "MySQL"],
+          ["MongoDB error", "MongoDB (NoSQL)"],
+          ["Invalid JSON input", "Generic NoSQL"],
+          ["BSON error", "MongoDB (NoSQL)"]
+        ],
+        "CMDI": [
+          ["command not found", "Command Injection"],
+          ["syntax error near unexpected token", "Command Injection"],
+          ["sh:", "Command Injection"],
+          ["bash:", "Command Injection"]
+        ],
+        "LFI": [
+          ["failed to open stream", "LFI"],
+          ["No such file or directory", "LFI"],
+          ["Permission denied", "LFI"]
+        ],
+        "CRLF": [
+          ["malformed header", "CRLF Injection"],
+          ["unexpected header", "CRLF Injection"]
+        ],
+        "REDIRECT": [
+          ["Location: http", "Open Redirect"],
+          ["Location: //", "Open Redirect"]
+        ]
+      }
+    },
+    {
+      "payload": "<script>1</script>",
+      "modules": {
+        "XSS": [
+          ["<script>1</script>", "Reflected XSS"],
+          ["<script>alert", "Reflected XSS"],
+          ["onerror=", "Reflected XSS"]
+        ]
+      }
+    }
+  ]
+}
