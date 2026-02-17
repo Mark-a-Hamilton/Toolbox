@@ -1,0 +1,86 @@
+#!/bin/bash
+# ┌────────────────────────────────────────────────────────┐
+# │ Version         : 2026.02.17-01                        │
+# │ Tool Name       : mda4w                                │
+# │ Author          : Mark Hamilton (Co-Pilot assisted)    │
+# │ Purpose         : Windows Memory Dump Analysis Wrapper │
+# │ Package         : toolbox                              │
+# └────────────────────────────────────────────────────────┘
+#
+# Usage:
+#   mda4w <memory_dump> [volatility_flags]
+#
+# Example:
+#   mda4w memdump.mem -f
+#
+# Description:
+#   A lightweight wrapper around Volatility3 for analysing
+#   Windows memory dumps. It runs a curated set of Windows
+#   plugins and stores each result in a separate output file.
+#
+#   This tool is intentionally minimal: it makes no assumptions,
+#   adds no noise, and simply prepares structured output for
+#   deeper analysis.
+#
+
+# ─── Input Validation ────────────────────────────────────────
+if [[ -z "$1" ]]; then
+    echo "Error: No memory dump file provided."
+    echo "Usage: mda4w <memory_dump> [volatility_flags]"
+    exit 1
+fi
+
+MEM="$1"
+FLAGS="$2"
+
+if [[ ! -f "$MEM" ]]; then
+    echo "Error: Memory dump file '$MEM' not found."
+    exit 1
+fi
+
+# ─── Output Directory ─────────────────────────────────────────
+OUTDIR="mda4w-output"
+
+mkdir -p "$OUTDIR"
+
+echo "Starting Windows memory analysis..."
+echo "Output will be saved in: $OUTDIR"
+echo ""
+
+# ─── Volatility3 Execution ────────────────────────────────────
+run_vol() {
+    local plugin="$1"
+    local outfile="$OUTDIR/${plugin}.out"
+    echo "Running: $plugin"
+    vol $FLAGS "$MEM" "windows.$plugin" > "$outfile"
+}
+
+run_vol cmdline
+run_vol drivermodule
+run_vol filescan
+run_vol getsids
+run_vol handles
+run_vol info
+run_vol netscan
+run_vol netstat
+run_vol mftscan
+run_vol pslist
+run_vol pstree
+
+# ─── Summary / Reminders ──────────────────────────────────────
+echo ""
+echo "Analysis complete. Summary of generated files:"
+echo "  cmdline.out      - Process command-line arguments"
+echo "  drivermodule.out - Hidden or suspicious drivers"
+echo "  filescan.out     - File objects in memory"
+echo "  getsids.out      - Security identifiers per process"
+echo "  handles.out      - Open handles per process"
+echo "  info.out         - OS and kernel details"
+echo "  netscan.out      - Network objects"
+echo "  netstat.out      - Network tracking structures"
+echo "  mftscan.out      - Alternate Data Streams (ADS)"
+echo "  pslist.out       - Process list"
+echo "  pstree.out       - Process tree"
+echo ""
+echo "All files saved in: $OUTDIR"
+echo "✔ Windows Memory Analysis complete."
