@@ -2,39 +2,37 @@
 
 flowchart TD
 
-    A["Start is Engine"] --> B["Load Profile\n(default: stealth.json)"]
-    B --> C{"Profile Valid?"}
+    A["Start Engine"] --> B["Load Profile"]
+    B --> C["Validate Profile"]
 
-    C -- "No" --> Z["Exit with Error"]
-    C -- "Yes" --> D["Begin Payload Loop"]
+    C -->|Valid| D["Begin Payload Loop"]
+    C -->|Invalid| Z["Exit Error"]
 
-    D --> E["Send Request\n(GET or POST)"]
+    D --> E["Send Request"]
     E --> F["Receive Response"]
 
-    F --> G["Iterate Modules\n(DBI, XSS, CMDI, etc.)"]
-    G --> H["Check Signatures\n(pattern → meaning)"]
+    F --> G["Check Modules"]
+    G --> H["Check Signatures"]
 
-    H --> I{"Signature Match?"}
+    H --> I["Match Found"]
+    H --> J["No Match"]
 
-    I -- "Yes" --> J["Record Finding\n(module, payload, meaning)"]
-    I -- "No" --> D2["Next Module or Payload"]
+    I --> K["Record Finding"]
+    J --> L["Next Module Or Payload"]
 
-    J --> D2
+    K --> L
+    L -->|More Payloads| D
+    L -->|Done| M["Generate Report"]
 
-    D2 -->| "More Payloads" | D
-    D2 -->| "No More Payloads" | K["Generate Report"]
+    M --> N["Check DBI"]
+    N -->|No DBI| Q["Finish Scan"]
+    N -->|DBI Found| R["Classify DB Type"]
 
-    K --> L{"DBI Detected?"}
+    R --> S["Check Auto Creds"]
+    S -->|No| Q
+    S -->|Yes| T["Run Credential Extraction"]
 
-    L -- "No" --> M["Finish Scan"]
-    L -- "Yes" --> N["Classify DB Type\n(SQL or NoSQL)"]
-
-    N --> O{"--auto-creds Used?"}
-
-    O -- "No" --> M
-    O -- "Yes" --> P["Run Credential Extraction\n(SQL or NoSQL)"]
-
-    P --> M
+    T --> Q
 
 ---
 
