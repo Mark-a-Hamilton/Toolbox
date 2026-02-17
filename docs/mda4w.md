@@ -232,3 +232,22 @@ The tool teaches you how memory forensics works by exposing the raw artefacts.
 
 It’s a small script with outsized impact — exactly the kind of tool that makes your toolbox powerful.
 
+---
+
+## 📢 Disclaimer
+
+This tool performs **non‑destructive system hygiene only**.  
+It does **not** perform scanning, enumeration, or offensive actions.  
+Use responsibly and only in environments where you have explicit permission.
+
+---
+
+## 🤖 AI & Ethics Disclosure
+
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
+
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
+
+
+
