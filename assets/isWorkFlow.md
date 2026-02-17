@@ -1,10 +1,7 @@
 # 📐 **assets/isWorkflow.md — Injection Scanner Workflow Diagram**
 
-```markdown
 # Injection Scanner (is) — Engine Workflow Diagram
 
-```mermaid
-flowchart TD
 flowchart TD
 
     A["Start is Engine"] --> B["Load Profile\n(default: stealth.json)"]
