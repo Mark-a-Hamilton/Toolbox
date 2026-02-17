@@ -1,24 +1,3 @@
-Absolutely, Mark — now that the engine and documentation are in place, the **next logical asset** for the `is` tool is a **visual workflow diagram** that explains the engine’s logic at a glance.
-
-This belongs in:
-
-```
-assets/isWorkflow.md
-```
-
-It gives newcomers (and future‑you) an instant understanding of:
-
-- how the engine loads profiles  
-- how payloads are processed  
-- how modules analyse responses  
-- how DBI classification works  
-- how credential extraction fits in  
-- how the whole system flows end‑to‑end  
-
-Below is a clean, professional **Mermaid workflow diagram** you can drop directly into your repo.
-
----
-
 # 📐 **assets/isWorkflow.md — Injection Scanner Workflow Diagram**
 
 ```markdown
@@ -122,16 +101,3 @@ This workflow diagram:
 It’s the kind of asset that turns a tool into a **framework**.
 
 ---
-
-If you want, I can also generate:
-
-### ✔ `assets/isArchitecture.md`  
-A diagram showing the file/module structure.
-
-### ✔ `assets/profileStructure.md`  
-A diagram showing how JSON profiles are parsed.
-
-### ✔ `assets/credsWorkflow.md`  
-A diagram showing SQL/NoSQL credential extraction flow.
-
-Just tell me which one you want next.
