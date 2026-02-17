@@ -5,7 +5,7 @@ flowchart TD
     A["Start Engine"] --> B["Load Profile"]
     B --> C["Validate Profile"]
 
-    C -->|Valid| D["Begin Payload Loop"]
+    C -->|Valid| D["Payload Loop"]
     C -->|Invalid| Z["Exit Error"]
 
     D --> E["Send Request"]
@@ -18,19 +18,19 @@ flowchart TD
     H --> J["No Match"]
 
     I --> K["Record Finding"]
-    J --> L["Next Module Or Payload"]
+    J --> L["Next Item"]
 
     K --> L
-    L -->|More Payloads| D
+    L -->|More| D
     L -->|Done| M["Generate Report"]
 
     M --> N["Check DBI"]
-    N -->|No DBI| Q["Finish Scan"]
-    N -->|DBI Found| R["Classify DB Type"]
+    N -->|None| Q["Finish"]
+    N -->|Found| R["Classify DB"]
 
     R --> S["Check Auto Creds"]
     S -->|No| Q
-    S -->|Yes| T["Run Credential Extraction"]
+    S -->|Yes| T["Run Cred Extraction"]
 
     T --> Q
 
