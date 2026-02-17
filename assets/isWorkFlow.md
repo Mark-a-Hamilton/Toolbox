@@ -5,7 +5,7 @@ flowchart TD
 
     A["Start Engine"] --> B["Load Profile"]
     B --> C["Validate Profile"]
-```
+
     C -->|Valid| D["Payload Loop"]
     C -->|Invalid| Z["Exit Error"]
 
@@ -34,7 +34,7 @@ flowchart TD
     S -->|Yes| T["Run Cred Extraction"]
 
     T --> Q
-
+```
 ---
 
 # 🧩 What This Diagram Shows
