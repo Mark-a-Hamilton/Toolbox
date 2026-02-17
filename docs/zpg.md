@@ -1,4 +1,3 @@
-
 # 📘 **zpg — VyOS Zone Pair Generator**
 
 ## 1. Introduction
@@ -97,7 +96,6 @@ This makes network segmentation:
 
 ## 5. High‑Level Workflow
 
-````markdown
 ```mermaid
 flowchart TD
 A["Define Zones in CSV"] --> B["Define Zone Pairs in CSV"]
@@ -106,7 +104,6 @@ C --> D["Review Output Files"]
 D --> E["Import Rules into VyOS"]
 E --> F["Commit and Save Configuration"]
 ```
-````
 
 ---
 
