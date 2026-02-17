@@ -1,7 +1,7 @@
 # 📐 Injection Scanner (is) — Engine Workflow Diagram
 
 flowchart TD
-
+```mermaid
     A["Start Engine"] --> B["Load Profile"]
     B --> C["Validate Profile"]
 
