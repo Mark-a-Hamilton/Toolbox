@@ -4,40 +4,39 @@
 ********************
 flowchart TD
 
-    A[Start is Engine] --> B[Load Profile<br/>(default: stealth.json)]
-    B --> C{Profile Valid?}
+    A["Start is Engine"] --> B["Load Profile\n(default: stealth.json)"]
+    B --> C{"Profile Valid?"}
 
-    C -- "No" --> Z[Exit with Error]
-    C -- "Yes" --> D[Begin Payload Loop]
+    C -- "No" --> Z["Exit with Error"]
+    C -- "Yes" --> D["Begin Payload Loop"]
 
-    D --> E[Send Request<br/>(GET or POST)]
-    E --> F[Receive Response]
+    D --> E["Send Request\n(GET or POST)"]
+    E --> F["Receive Response"]
 
-    F --> G[Iterate Modules<br/>(DBI, XSS, CMDI, etc.)]
+    F --> G["Iterate Modules\n(DBI, XSS, CMDI, etc.)"]
+    G --> H["Check Signatures\n(pattern → meaning)"]
 
-    G --> H[Check Signatures<br/>(pattern → meaning)]
+    H --> I{"Signature Match?"}
 
-    H --> I{Signature Match?}
-
-    I -- "Yes" --> J[Record Finding<br/>(module, payload, meaning)]
-    I -- "No" --> D2[Next Module or Payload]
+    I -- "Yes" --> J["Record Finding\n(module, payload, meaning)"]
+    I -- "No" --> D2["Next Module or Payload"]
 
     J --> D2
 
-    D2 -->|More Payloads| D
-    D2 -->|No More Payloads| K[Generate Report]
+    D2 -->| "More Payloads" | D
+    D2 -->| "No More Payloads" | K["Generate Report"]
 
-    K --> L{DBI Detected?}
+    K --> L{"DBI Detected?"}
 
-    L -- "No" --> M[Finish Scan]
-    L -- "Yes" --> N[Classify DB Type<br/>(SQL or NoSQL)]
+    L -- "No" --> M["Finish Scan"]
+    L -- "Yes" --> N["Classify DB Type\n(SQL or NoSQL)"]
 
-    N --> O{--auto-creds Used?}
+    N --> O{"--auto-creds Used?"}
 
     O -- "No" --> M
-    O -- "Yes" --> P[Run Credential Extraction<br/>(SQL or NoSQL)]
+    O -- "Yes" --> P["Run Credential Extraction\n(SQL or NoSQL)"]
 
-    P --> M[Finish Scan]
+    P --> M
 
 ********************
 ```markdown
