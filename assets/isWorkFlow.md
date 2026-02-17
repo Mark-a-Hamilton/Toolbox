@@ -1,5 +1,45 @@
 # 📐 **assets/isWorkflow.md — Injection Scanner Workflow Diagram**
 
+
+********************
+flowchart TD
+
+    A[Start is Engine] --> B[Load Profile<br/>(default: stealth.json)]
+    B --> C{Profile Valid?}
+
+    C -- "No" --> Z[Exit with Error]
+    C -- "Yes" --> D[Begin Payload Loop]
+
+    D --> E[Send Request<br/>(GET or POST)]
+    E --> F[Receive Response]
+
+    F --> G[Iterate Modules<br/>(DBI, XSS, CMDI, etc.)]
+
+    G --> H[Check Signatures<br/>(pattern → meaning)]
+
+    H --> I{Signature Match?}
+
+    I -- "Yes" --> J[Record Finding<br/>(module, payload, meaning)]
+    I -- "No" --> D2[Next Module or Payload]
+
+    J --> D2
+
+    D2 -->|More Payloads| D
+    D2 -->|No More Payloads| K[Generate Report]
+
+    K --> L{DBI Detected?}
+
+    L -- "No" --> M[Finish Scan]
+    L -- "Yes" --> N[Classify DB Type<br/>(SQL or NoSQL)]
+
+    N --> O{--auto-creds Used?}
+
+    O -- "No" --> M
+    O -- "Yes" --> P[Run Credential Extraction<br/>(SQL or NoSQL)]
+
+    P --> M[Finish Scan]
+
+********************
 ```markdown
 # Injection Scanner (is) — Engine Workflow Diagram
 
