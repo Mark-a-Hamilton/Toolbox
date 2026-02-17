@@ -85,18 +85,4 @@ It only detects and reports.
 
 ---
 
-# 🧭 Why This Asset Matters
 
-This workflow diagram:
-
-- gives newcomers instant clarity  
-- shows the engine’s architecture visually  
-- reinforces the data‑driven design  
-- demonstrates professional engineering discipline  
-- makes the repo feel complete and polished  
-- helps future maintainers understand the logic without reading code  
-- supports your CV and interview narrative  
-
-It’s the kind of asset that turns a tool into a **framework**.
-
----
