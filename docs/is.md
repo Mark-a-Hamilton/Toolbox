@@ -400,5 +400,10 @@ It answers the question:
 
 ---
 
+## 🤖 AI & Ethics Disclosure
 
+This tool and its documentation were co‑authored with AI assistance.  
+For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
+
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
 
