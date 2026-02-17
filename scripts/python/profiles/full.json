@@ -1,0 +1,119 @@
+{
+  "name": "full",
+  "description": "Full-spectrum injection detection profile. Minimal payloads, minimal requests, maximum module coverage.",
+  "payloads": [
+    {
+      "payload": ";",
+      "modules": {
+        "DBI": [
+          ["SQL syntax", "SQL-based DB (MySQL/MariaDB)"],
+          ["You have an error in your SQL syntax", "MySQL/MariaDB"],
+          ["Unclosed quotation mark", "MSSQL"],
+          ["near 'SELECT'", "SQLite"],
+          ["Unknown column", "SQL-based DB"],
+          ["mysql_fetch_array()", "MySQL"],
+          ["MongoDB error", "MongoDB (NoSQL)"],
+          ["Invalid JSON input", "Generic NoSQL"],
+          ["BSON error", "MongoDB (NoSQL)"]
+        ],
+        "CMDI": [
+          ["command not found", "Command Injection"],
+          ["syntax error near unexpected token", "Command Injection"],
+          ["sh:", "Command Injection"],
+          ["bash:", "Command Injection"]
+        ],
+        "LFI": [
+          ["failed to open stream", "LFI"],
+          ["No such file or directory", "LFI"],
+          ["Permission denied", "LFI"]
+        ],
+        "CRLF": [
+          ["malformed header", "CRLF Injection"],
+          ["unexpected header", "CRLF Injection"]
+        ],
+        "REDIRECT": [
+          ["Location: http", "Open Redirect"],
+          ["Location: //", "Open Redirect"]
+        ],
+        "LDAP": [
+          ["LDAPException", "LDAP Injection"],
+          ["Invalid DN", "LDAP Injection"],
+          ["Unbalanced parenthesis", "LDAP Injection"]
+        ],
+        "XPATH": [
+          ["XPathException", "XPath Injection"],
+          ["xmlXPathEval", "XPath Injection"],
+          ["Invalid predicate", "XPath Injection"]
+        ],
+        "XXE": [
+          ["DOCTYPE", "XXE"],
+          ["Entity", "XXE"],
+          ["XML parsing failed", "XXE"]
+        ],
+        "PROTO": [
+          ["prototype", "Prototype Pollution"],
+          ["__proto__", "Prototype Pollution"]
+        ],
+        "REDOS": [
+          ["Unterminated group", "Regex Injection"],
+          ["Invalid regular expression", "Regex Injection"]
+        ],
+        "HEADER": [
+          ["Invalid header", "Header Injection"],
+          ["Header injection detected", "Header Injection"]
+        ],
+        "JSONI": [
+          ["Unexpected token", "JSON Injection"],
+          ["JSON parse error", "JSON Injection"]
+        ],
+        "JWT": [
+          ["invalid signature", "JWT Injection"],
+          ["algorithm not allowed", "JWT Injection"]
+        ],
+        "DESERIAL": [
+          ["SerializationException", "Deserialization Vulnerability"],
+          ["InvalidClassException", "Deserialization Vulnerability"],
+          ["StreamCorruptedException", "Deserialization Vulnerability"]
+        ],
+        "FRAMEWORK": [
+          ["PHP Warning", "PHP-specific Injection"],
+          ["NodeError", "Node.js-specific Injection"],
+          ["JavaException", "Java-specific Injection"],
+          ["Traceback (most recent call last)", "Python-specific Injection"]
+        ]
+      }
+    },
+    {
+      "payload": "<script>1</script>",
+      "modules": {
+        "XSS": [
+          ["<script>1</script>", "Reflected XSS"],
+          ["<script>alert", "Reflected XSS"],
+          ["onerror=", "Reflected XSS"]
+        ]
+      }
+    },
+    {
+      "payload": "{{7*7}}",
+      "modules": {
+        "SSTI": [
+          ["49", "SSTI arithmetic evaluation"],
+          ["jinja2.exceptions", "Jinja2 SSTI"],
+          ["mustache", "Mustache SSTI"],
+          ["VelocityException", "Velocity SSTI"],
+          ["Thymeleaf", "Thymeleaf SSTI"]
+        ]
+      }
+    },
+    {
+      "payload": "{\"query\":\"{__schema{types{name}}}\"}",
+      "modules": {
+        "GRAPHQL": [
+          ["__schema", "GraphQL Introspection Enabled"],
+          ["Cannot query field", "GraphQL Error"],
+          ["GraphQL error", "GraphQL Error"]
+        ]
+      }
+    }
+  ]
+}
