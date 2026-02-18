@@ -1,28 +1,33 @@
-# 🧰 Toolbox
+# 🧰 Toolbox — Defensive Operator Suite
 
-**Toolbox** is a modular, operator‑grade suite of Bash, Python, and PHP utilities designed to create, maintain, and evolve a clean, predictable Linux environment — with a special focus on Kali and Debian‑based systems.
+**Toolbox** is a modular, operator‑grade collection of Bash and Python utilities designed for **incident response, diagnostics, system hygiene, and safe remote operations** on Ubuntu‑based environments.
 
-It provides a curated workflow for:
+It provides a curated, predictable workflow for:
 
-- building a new Kali environment (VM or WSL)  
-- installing a full desktop and toolset  
-- maintaining system hygiene  
-- performing updates, diagnostics, and cleanup  
-- ensuring traceability and ethical clarity  
+- analysing and repairing Linux systems  
+- maintaining system hygiene and stability  
+- performing diagnostics and state checks  
+- repairing broken sessions (GNOME/RDP)  
+- verifying PostgreSQL service health  
+- safely transferring and executing files during IR  
+- generating hashes for chain‑of‑custody  
+- running domain connectivity checks  
+- performing safe, controlled injection scanning  
+- generating VyOS zone‑pair configurations  
 
 Toolbox is **not** a penetration‑testing framework.  
-It is a **system‑maintenance and environment‑building toolkit**.
+It is a **defensive, blue‑team‑focused toolkit** designed for clarity, safety, and operational maturity.
 
 ---
 
-## 📖 Project Overview
+# 📖 Project Overview
 
 Toolbox provides:
 
-- A **deliberate, reproducible workflow** for setting up a full Kali environment  
-- A set of **modular tools** for updates, cleanup, diagnostics, listeners, and installation  
-- A **clean architecture** with consistent metadata, versioning, and documentation  
-- A **beginner‑friendly path** from minimal ISO → full Kali desktop → maintained system  
+- A **clean, reproducible workflow** for maintaining Ubuntu‑based systems  
+- A set of **modular tools** for diagnostics, cleanup, hashing, session repair, and safe remote execution  
+- A **consistent architecture** with metadata, versioning, and documentation  
+- A **professional, operator‑grade layout** suitable for IR teams and system maintainers  
 
 Every tool is:
 
@@ -33,12 +38,10 @@ Every tool is:
 
 ---
 
-# 🔧 Toolbox Tool Paths (Bash, Python, PHP)
+# 🔧 Toolbox Tool Paths
 
 Toolbox supports tools written in **Bash**, **Python**, and **PHP**.  
-To keep everything consistent, predictable, and easy to index, each language has its own dedicated directory under `/usr/local/bin`.
-
-### **Standardised Tool Locations**
+Each language has its own dedicated directory under `/usr/local/bin` for consistency and predictability.
 
 | Language | Path |
 |----------|------|
@@ -51,15 +54,13 @@ These paths are used by:
 - the **tool‑box** indexer  
 - your **PATH** configuration  
 - your **documentation structure**  
-- your **versioning and metadata conventions**  
-
-This ensures every tool—regardless of language—behaves the same way.
+- your **metadata conventions**  
 
 ---
 
-## 🧩 Adding Toolbox Paths to Your Shell
+# 🧩 Adding Toolbox Paths to Your Shell
 
-Add the following to your `~/.bashrc`:
+Add to `~/.bashrc`:
 
 ```bash
 export PATH="/usr/local/bin/bash:/usr/local/bin/python:/usr/local/bin/php:$PATH"
@@ -71,53 +72,34 @@ Reload:
 source ~/.bashrc
 ```
 
-This makes all Toolbox tools globally available.
-
 ---
 
-# 🚀 Getting Started (The Toolbox Workflow)
+# 🚀 Getting Started
 
-Toolbox provides a **6‑step, beginner‑friendly path** to a full Kali environment.
-
-### **1) Create a Kali VM (Hyper‑V or WSL)**  
-See:  
-📄 `docs/VirtualMachine.md`
-
-### **2) Copy Toolbox tools into place**
+### **1) Install Toolbox directories**
 ```bash
 sudo mkdir -p /usr/local/bin/bash
 sudo mkdir -p /usr/local/bin/python
 sudo mkdir -p /usr/local/bin/php
-sudo cp <your toolbox scripts> /usr/local/bin/bash
-sudo chmod +x /usr/local/bin/bash/*
 ```
 
-### **3) Add Toolbox to your PATH**
-Add to `~/.bashrc`:
+### **2) Copy tools into place**
+```bash
+sudo cp bash/* /usr/local/bin/bash
+sudo cp python/* /usr/local/bin/python
+sudo cp php/* /usr/local/bin/php
+sudo chmod +x /usr/local/bin/bash/*
+sudo chmod +x /usr/local/bin/python/*
+sudo chmod +x /usr/local/bin/php/*
+```
+
+### **3) Add Toolbox to PATH**
 ```bash
 export PATH="/usr/local/bin/bash:/usr/local/bin/python:/usr/local/bin/php:$PATH"
-```
-Reload:
-```bash
 source ~/.bashrc
 ```
 
-### **4) Run the update tool**
-```bash
-sudo update
-```
-
-### **5) Run the Full Kali Installer**
-```bash
-sudo fki
-```
-
-### **6) Run update again**
-```bash
-sudo update
-```
-
-You now have a clean, complete, reproducible Kali environment.
+You now have a clean, defensive operator toolbox ready for use.
 
 ---
 
@@ -126,9 +108,9 @@ You now have a clean, complete, reproducible Kali environment.
 | Folder        | Description                                                                 |
 |---------------|-----------------------------------------------------------------------------|
 | `docs/`       | Documentation for each tool and workflow                                    |
-| `bash/`       | Toolbox Bash scripts (installed to `/usr/local/bin/bash`)                   |
-| `python/`     | Toolbox Python scripts (installed to `/usr/local/bin/python`)               |
-| `php/`        | Toolbox PHP scripts (installed to `/usr/local/bin/php`)                     |
+| `bash/`       | Bash tools (installed to `/usr/local/bin/bash`)                             |
+| `python/`     | Python tools (installed to `/usr/local/bin/python`)                         |
+| `php/`        | PHP tools (installed to `/usr/local/bin/php`)                               |
 | `.hashmap/`   | Optional folder for script hashes and timestamps                            |
 | `assets/`     | Diagrams, screenshots, and visual aids                                      |
 
@@ -138,45 +120,58 @@ You now have a clean, complete, reproducible Kali environment.
 
 | Tool      | Purpose |
 |-----------|---------|
-| `update`  | Full system update + locate DB refresh |
+| `update`  | System update + locate DB refresh |
 | `cleanup` | System hygiene and temporary file cleanup |
 | `diag`    | Diagnostics and environment checks |
-| `lstnr`   | Ethical listener with socat/netcat fallback |
-| `fki`     | Full Kali Install (kali‑linux‑large) |
-| `template`| Base template for creating new tools |
+| `lstnr`   | Ethical listener with safe fallback |
+| `hash`    | MD5 hash creation and verification |
+| `pgsql-session` | PostgreSQL session wrapper |
+| `pgsql-state`   | PostgreSQL service state checker |
+| `repsess` | Repair broken GNOME/RDP sessions |
+| `xfer`    | Safe remote transfer + execution utility |
+| `bf`      | Pattern‑based brute‑force demonstrator (educational) |
+| `domcon`  | Domain connectivity preflight checker |
+| `is`      | Injection scanner engine |
+| `zpg`     | VyOS zone‑pair generator |
 
 Full documentation for each tool is in `/docs`.
 
 ---
 
-# 🤖 AI & Ethics
+# 🛡️ Defensive Philosophy
 
-Toolbox is co‑developed with AI assistance.  
-To ensure transparency, safety, and responsible use, the project follows these principles:
+Toolbox is designed around **blue‑team principles**:
 
-### **1. Ethical Boundaries**
-Toolbox contains **no offensive security tools**.  
-All scripts wrap standard system commands for maintenance and setup.
+### **1. Safety & Control**
+All tools operate under:
 
-### **2. Transparency**
+- authenticated  
+- bounded  
+- predictable  
+- auditable  
+
+execution models.
+
+### **2. No Offensive Capability**
+Toolbox contains **no red‑team tools**, payloads, or exploitation mechanisms.
+
+### **3. Transparency**
 Every tool includes:
 
 - version metadata  
 - purpose metadata  
 - optional hash‑based traceability  
 
-### **3. Responsible AI Use**
-AI is used for:
+### **4. Responsible Use**
+Toolbox is intended for:
 
-- documentation  
-- code generation  
-- workflow refinement  
+- incident response  
+- diagnostics  
+- system repair  
+- safe remote operations  
+- educational demonstrations  
 
-…but all output is reviewed, tested, and validated by a human operator.
-
-### **4. User Responsibility**
-Use Toolbox only in environments where you have explicit permission.  
-It is designed for learning, maintenance, and operational hygiene.
+Use only in environments where you have explicit permission.
 
 ---
 
@@ -187,7 +182,7 @@ Contributions are welcome. Please ensure:
 - tools follow the `template` structure  
 - versioning uses `YYYY.MM.DD-BUILD`  
 - documentation is added to `/docs`  
-- functionality remains within the ethical scope  
+- functionality remains within the defensive scope  
 
 ---
 
