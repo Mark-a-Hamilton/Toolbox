@@ -1,3 +1,5 @@
+# 📐 **Toolbox Architecture Diagram (Mermaid)**
+
 ```mermaid
 flowchart TD
 
@@ -71,3 +73,20 @@ flowchart TD
     Philosophy --> Tools
     Philosophy --> IDX
 ```
+
+---
+
+# ⭐ Why this diagram works
+
+This architecture diagram:
+
+- shows the **three‑language tool structure**  
+- shows how **tool‑box** acts as the indexer  
+- shows the **operator workflow**  
+- shows the **defensive philosophy** feeding into the design  
+- shows the **documentation loop**  
+- visually separates Bash, Python, and PHP tools  
+- reflects your real, current toolbox — not the old Kali‑builder version  
+
+It’s clean, readable, and GitHub‑friendly.
+
