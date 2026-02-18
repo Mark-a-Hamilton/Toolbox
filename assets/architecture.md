@@ -14,6 +14,9 @@ This version is **fully GitHub‑compatible** and will render correctly.
 
 ```mermaid
 flowchart TD
+    A[Operator]
+    B[tool-box]
+    A --> B
 ```
     User[Operator]
 
