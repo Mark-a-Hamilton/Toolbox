@@ -11,13 +11,12 @@ This document provides a high‑level overview of how the toolbox is structured,
 The following diagram shows the core components of the Toolbox ecosystem and how they relate to each other.
 
 This version is **fully GitHub‑compatible** and will render correctly.
-````markdown
+.markdown
 ```mermaid
 flowchart TD
     A --> B
 
 ```
-````
 
 ---
 
