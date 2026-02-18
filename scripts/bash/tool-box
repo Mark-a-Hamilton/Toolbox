@@ -56,9 +56,10 @@ if [ -z "$1" ]; then
 
             version=$(grep -m1 "^#.*Version" "$file" \
                       | cut -d':' -f2- \
-                      | sed 's/^ *//;s/ *$//;s/│$//')
+                      | sed 's/│$//' \
+                      | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-            printf "  %-15s : %-45s (Version: %s)\n" \
+            printf "  %-15s : %-40s (Version: %s)\n" \
                    "$name" "$purpose" "$version"
         done
         echo
@@ -79,6 +80,4 @@ if [ -f "$target" ]; then
     awk '/^# ┌/,/^# End Help/' "$target" | sed 's/^# //'
 else
     echo "Tool '$1' not found in $TOOL_ROOT/bash."
-fi
-
 fi
