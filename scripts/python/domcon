@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+# ┌────────────────────────────────────────────────────────┐
+# │ Version        : 2026.02.17-01                         │
+# │ Tool Name      : domcon                                │
+# │ Author         : Mark Hamilton (Co-Pilot assisted)     │
+# │ Purpose        : Domain Connectivity Preflight Checker │
+# │ Package        : toolbox                               │
+# └────────────────────────────────────────────────────────┘
+
+import argparse
+import socket
+import subprocess
+
+PORTS_TO_CHECK = [80, 443, 8080]
+
+# ─── DNS Resolution ───────────────────────────────────────────
+def check_dns(host):
+    try:
+        ip = socket.gethostbyname(host)
+        print(f"[+] DNS OK: {host} → {ip}")
+        return ip
+    except Exception as e:
+        print(f"[!] DNS Failed for {host}: {e}")
+        return None
+
+# ─── Ping Test ────────────────────────────────────────────────
+def ping(ip):
+    print(f"[+] Pinging {ip} ...")
+    result = subprocess.run(["ping", "-c", "3", ip], capture_output=True)
+    if result.returncode == 0:
+        print("[+] Ping OK")
+    else:
+        print("[!] Ping Failed")
+
+# ─── Port Check ───────────────────────────────────────────────
+def check_port(ip, port):
+    try:
+        with socket.create_connection((ip, port), timeout=2):
+            print(f"[+] Port {port} open")
+    except:
+        print(f"[!] Port {port} closed or unreachable")
+
+# ─── HTTP HEAD Check ──────────────────────────────────────────
+def curl_head(host):
+    print(f"[+] HTTP HEAD request to {host} ...")
+    try:
+        result = subprocess.run(
+            ["curl", "-I", f"http://{host}"],
+            capture_output=True,
+            timeout=4
+        )
+        print(result.stdout.decode())
+    except Exception as e:
+        print(f"[!] Curl failed: {e}")
+
+# ─── Main ─────────────────────────────────────────────────────
+def main():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Domain Connectivity Preflight Checker\n"
+            "Performs DNS resolution, ping, port checks, and HTTP HEAD request.\n"
+            "Useful before running scanners, brute-force tools, or remote workflows."
+        )
+    )
+
+    parser.add_argument(
+        "domain",
+        help="Target domain or hostname (e.g. example.com)"
+    )
+
+    args = parser.parse_args()
+
+    ip = check_dns(args.domain)
+    if not ip:
+        print("[!] Cannot continue — host unresolved.")
+        return
+
+    ping(ip)
+
+    for port in PORTS_TO_CHECK:
+        check_port(ip, port)
+
+    curl_head(args.domain)
+
+if __name__ == "__main__":
+    main()
