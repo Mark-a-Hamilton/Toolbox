@@ -20,7 +20,7 @@ flowchart TD
     User --> ToolBox
 
     ToolBox[tool-box Indexer]
-
+```
     ToolBox --> BashDir[/usr/local/bin/bash/]
     ToolBox --> PythonDir[/usr/local/bin/python/]
     ToolBox --> PHPDir[/usr/local/bin/php/]
