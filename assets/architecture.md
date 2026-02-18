@@ -14,8 +14,44 @@ This version is **fully GitHub‑compatible** and will render correctly.
 
 ```mermaid
 flowchart TD
-    A --> B
 
+    User[Operator]
+
+    User --> ToolBox
+
+    ToolBox[tool-box indexer]
+
+    ToolBox --> BashDir[Bash tools directory]
+    ToolBox --> PythonDir[Python tools directory]
+    ToolBox --> PhpDir[PHP tools directory]
+
+    BashDir --> B1[update]
+    BashDir --> B2[cleanup]
+    BashDir --> B3[diag]
+    BashDir --> B4[hash]
+    BashDir --> B5[lstnr]
+    BashDir --> B6[mda4w]
+    BashDir --> B7[pgsql-session]
+    BashDir --> B8[pgsql-state]
+    BashDir --> B9[polkit]
+    BashDir --> B10[repsess]
+    BashDir --> B11[xfer]
+    BashDir --> B12[clean-lp]
+
+    PythonDir --> P1[bf]
+    PythonDir --> P2[domcon]
+    PythonDir --> P3[is]
+    PythonDir --> P4[zpg]
+
+    PhpDir --> PH1[no active tools]
+
+    User --> Docs[Documentation]
+
+    Philosophy[Defensive principles]
+
+    Philosophy --> ToolBox
+    Philosophy --> BashDir
+    Philosophy --> PythonDir
 ```
 
 ---
