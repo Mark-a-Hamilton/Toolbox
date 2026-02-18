@@ -18,28 +18,7 @@ flowchart TD
     B[tool-box]
     A --> B
 ```
-    User[Operator]
 
-    User --> ToolBox
-
-    ToolBox[tool-box Indexer]
-
-    ToolBox --> BashDir[/usr/local/bin/bash/]
-    ToolBox --> PythonDir[/usr/local/bin/python/]
-    ToolBox --> PHPDir[/usr/local/bin/php/]
-
-    BashDir --> BashTools[Bash Tools]
-    PythonDir --> PythonTools[Python Tools]
-    PHPDir --> PhpTools[PHP Tools]
-
-    User --> Docs[Documentation]
-
-    Philosophy[Defensive Principles]
-
-    Philosophy --> ToolBox
-    Philosophy --> BashTools
-    Philosophy --> PythonTools
-```
 
 ---
 
