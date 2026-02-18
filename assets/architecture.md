@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
     subgraph User["Operator"]
@@ -69,3 +70,4 @@ flowchart TD
 
     Philosophy --> Tools
     Philosophy --> IDX
+```
