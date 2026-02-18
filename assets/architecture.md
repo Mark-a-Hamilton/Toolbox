@@ -14,9 +14,9 @@ This version is **fully GitHub‑compatible** and will render correctly.
 
 ```mermaid
 flowchart TD
-
-    User[Operator]
 ```
+    User[Operator]
+
     User --> ToolBox
 
     ToolBox[tool-box Indexer]
