@@ -55,7 +55,6 @@ It’s a small tool with big practical value.
 
 ## 3. High‑Level Workflow
 
-````markdown
 ```mermaid
 flowchart TD
 A["DNS Resolution"] --> B["Ping Host"]
@@ -63,7 +62,6 @@ B --> C["Check Common Ports"]
 C --> D["HTTP HEAD Request"]
 D --> E["Report Connectivity Status"]
 ```
-````
 
 ---
 
