@@ -16,11 +16,11 @@ This version is **fully GitHub‑compatible** and will render correctly.
 flowchart TD
 
     User[Operator]
-
+```
     User --> ToolBox
 
     ToolBox[tool-box Indexer]
-```
+
     ToolBox --> BashDir[/usr/local/bin/bash/]
     ToolBox --> PythonDir[/usr/local/bin/python/]
     ToolBox --> PHPDir[/usr/local/bin/php/]
