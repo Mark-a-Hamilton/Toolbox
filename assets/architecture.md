@@ -52,6 +52,7 @@ flowchart TD
     Philosophy --> ToolBox
     Philosophy --> BashDir
     Philosophy --> PythonDir
+
 ```
 
 ---
