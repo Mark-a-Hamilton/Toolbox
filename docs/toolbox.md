@@ -1,4 +1,4 @@
-# 🧰 tool-box
+# 🧰 toolbox
 
 `tool-box` is the central indexer for the Toolbox suite.  
 It lists all available tools across supported languages and extracts each tool’s metadata (Script Purpose + Version) directly from its embedded header. When provided a tool name, it displays the detailed help block for Bash tools.
