@@ -7,12 +7,12 @@
 # └───────────────────────────────────────────────────────┘
 #
 # Usage:
-#   tool-box [<tool-name>]
+#   toolbox [<tool-name>]
 #
 # Examples:
-#   tool-box
-#   tool-box diag
-#   tool-box update
+#   toolbox
+#   toolbox diag
+#   toolbox update
 #
 # Description:
 #   Lists all available tools across supported languages:
@@ -65,9 +65,9 @@ if [ -z "$1" ]; then
         echo
     done
 
-    echo "For Bash tool help:   tool-box <tool-name>"
-    echo "For Python tools:     <tool-name> -h"
-    echo "For PHP tools:        <tool-name> -h"
+    echo "For Bash tool help:   toolbox <tool name>"
+    echo "For Python tools:     <tool name> -h"
+    echo "For PHP tools:        <tool name> -h"
     exit 0
 fi
 
