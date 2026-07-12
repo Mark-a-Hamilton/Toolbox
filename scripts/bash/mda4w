@@ -2,8 +2,8 @@
 # ┌────────────────────────────────────────────────────────┐
 # │ Version         : 2026.02.17-01                        │
 # │ Tool Name       : mda4w                                │
-# │ Author          : Mark Hamilton (Co-Pilot assisted)    │
-# │ Purpose         : Windows Memory Dump Analysis Wrapper │
+# │ Author          : Mark Hamilton | Co-Pilot assisted    │
+# │ Script Purpose  : Windows Memory Dump Analysis Wrapper │
 # │ Package         : toolbox                              │
 # └────────────────────────────────────────────────────────┘
 #
@@ -84,3 +84,4 @@ echo "  pstree.out       - Process tree"
 echo ""
 echo "All files saved in: $OUTDIR"
 echo "✔ Windows Memory Analysis complete."
+  
