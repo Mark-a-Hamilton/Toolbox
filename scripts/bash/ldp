@@ -1,0 +1,144 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.07.12-00                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : Linux Desktop Launcher (X11/DBus)    │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   ldp [--dry-run] [--verbose] [--log] [--hashmap]
+#
+# Description:
+#   Launches a Linux desktop session with X11 rendering, D-Bus setup,
+#   ICE socket correction, XFCE session lock cleanup, and safe startup
+#   of the XFCE window manager. Designed for authorised local use.
+#
+# Output Files:
+#   /var/log/ldp.log                 (when --log is used)
+#   .hashmap/ldp.hash                (when --hashmap is used)
+#   .hashmap/ldp.timestamp           (when --hashmap is used)
+#
+# End Help
+
+# ─── Metadata ─────────────────────────────────────────────
+TOOL_NAME="ldp"
+VERSION="2026.07.12-00"
+
+LOGFILE="/var/log/${TOOL_NAME}.log"
+HASHDIR=".hashmap"
+HASHFILE="${HASHDIR}/${TOOL_NAME}.hash"
+TIMESTAMP="${HASHDIR}/${TOOL_NAME}.timestamp"
+
+# ─── Flags ────────────────────────────────────────────────
+DRY_RUN=false
+VERBOSE=false
+LOGGING=false
+HASHMAP=false
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --verbose) VERBOSE=true ;;
+    --log) LOGGING=true ;;
+    --hashmap) HASHMAP=true ;;
+    --help)
+        echo "Usage: $TOOL_NAME [--dry-run] [--verbose] [--log] [--hashmap]"
+        exit 0 ;;
+    *) echo "[!] Unknown argument: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# ─── Helpers ──────────────────────────────────────────────
+log() { $VERBOSE && echo "[LOG] $1"; }
+
+run_step() {
+  local cmd="$1"
+  if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: $cmd"
+  else
+    log "Executing: $cmd"
+    eval "$cmd"
+  fi
+}
+
+# ─── Main Logic ───────────────────────────────────────────
+main() {
+  log "Starting $TOOL_NAME version $VERSION"
+  echo "[*] Linux Desktop Launcher Initialising..."
+
+  # Resolve DISPLAY
+  run_step 'export DISPLAY=$(ip route | awk "/^default/ {print \$3}"):0.0'
+  echo "DISPLAY → $DISPLAY"
+
+  # X11 rendering options
+  run_step 'export LIBGL_ALWAYS_INDIRECT=1'
+  run_step 'export GDK_BACKEND=x11'
+  run_step 'export QT_QPA_PLATFORM=xcb'
+  echo "X11 backend variables set"
+
+  # D-Bus session
+  if [ ! -S /run/user/$(id -u)/bus ]; then
+    run_step 'eval "$(dbus-launch --sh-syntax)"'
+    echo "Started new D-Bus session (PID: $DBUS_SESSION_BUS_PID)"
+  else
+    echo "D-Bus session already active"
+  fi
+
+  # ICE socket fix
+  if [ -d /tmp/.ICE-unix ]; then
+    run_step 'sudo chown root:root /tmp/.ICE-unix'
+    run_step 'sudo chmod 1777 /tmp/.ICE-unix'
+    echo "ICE socket permissions corrected"
+  else
+    echo "/tmp/.ICE-unix not found"
+  fi
+
+  # Remove old XFCE session locks
+  run_step 'rm -f ~/.cache/sessions/xfce4-session-*.lock'
+  echo "Cleared XFCE session locks"
+
+  # Start window manager if needed
+  if ! pgrep -x "xfwm4" >/dev/null; then
+    run_step 'nohup xfwm4 --replace >/dev/null 2>&1 &'
+    echo "Started xfwm4"
+  else
+    echo "xfwm4 already running"
+  fi
+
+  # Export Xauthority
+  run_step 'export XAUTHORITY=$HOME/.Xauthority'
+  echo "XAUTHORITY → $XAUTHORITY"
+
+  # Start full XFCE session
+  run_step 'nohup startxfce4 >/dev/null 2>&1 &'
+  echo "XFCE session launched"
+
+  echo "[*] Desktop launch completed."
+}
+
+main
+
+# ─── Logging ──────────────────────────────────────────────
+if $LOGGING && ! $DRY_RUN; then
+  mkdir -p "$(dirname "$LOGFILE")"
+  echo "[*] Logging enabled → $LOGFILE"
+  {
+    echo "=== $TOOL_NAME ==="
+    date
+    echo "Version: $VERSION"
+    echo "Executed with flags: DRY_RUN=$DRY_RUN VERBOSE=$VERBOSE LOGGING=$LOGGING HASHMAP=$HASHMAP"
+    echo "===================="
+  } >> "$LOGFILE"
+fi
+
+# ─── Hashmap ──────────────────────────────────────────────
+if $HASHMAP; then
+  mkdir -p "$HASHDIR"
+  echo "[*] Generating traceability files..."
+  date +"%Y-%m-%d %H:%M:%S" > "$TIMESTAMP"
+  sha256sum "$0" > "$HASHFILE"
+  echo "[*] Timestamp → $TIMESTAMP"
+  echo "[*] Hash → $HASHFILE"
+fi
