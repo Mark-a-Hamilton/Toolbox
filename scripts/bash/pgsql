@@ -1,0 +1,163 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.07.12-00                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : Unified PostgreSQL Controller        │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   pgsql <mode> [psql args] [--dry-run] [--verbose] [--log] [--hashmap]
+#
+# Modes:
+#   ensure      Ensure PostgreSQL is running
+#   state       Check PostgreSQL state and start if needed
+#   session     Start a temporary PostgreSQL instance for this session
+#
+# Examples:
+#   pgsql ensure
+#   pgsql state --verbose
+#   pgsql session -d mydb -U analyst
+#
+# Description:
+#   A unified PostgreSQL management tool combining:
+#     • pgsql-is-running  → minimal ensure-running check
+#     • pgsql-state       → safe state checker + wait + report
+#     • pgsql-session     → session-bound PostgreSQL wrapper
+#
+#   This tool provides a single interface for PostgreSQL lifecycle
+#   control in lab VMs, DFIR workflows, and minimal environments.
+#
+# Output Files:
+#   /var/log/pgsql.log                 (when --log is used)
+#   .hashmap/pgsql.hash                (when --hashmap is used)
+#   .hashmap/pgsql.timestamp           (when --hashmap is used)
+#
+# End Help
+
+# ─── Metadata ─────────────────────────────────────────────
+TOOL_NAME="pgsql"
+VERSION="2026.07.12-00"
+
+LOGFILE="/var/log/${TOOL_NAME}.log"
+HASHDIR=".hashmap"
+HASHFILE="${HASHDIR}/${TOOL_NAME}.hash"
+TIMESTAMP="${HASHDIR}/${TOOL_NAME}.timestamp"
+
+# ─── Flags ────────────────────────────────────────────────
+DRY_RUN=false
+VERBOSE=false
+LOGGING=false
+HASHMAP=false
+
+# ─── Mode ─────────────────────────────────────────────────
+MODE="$1"
+shift || true
+
+# ─── Flag Parser ──────────────────────────────────────────
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --verbose) VERBOSE=true ;;
+    --log) LOGGING=true ;;
+    --hashmap) HASHMAP=true ;;
+    --help)
+        echo "Usage: $TOOL_NAME <ensure|state|session> [psql args] [--dry-run] [--verbose] [--log] [--hashmap]"
+        exit 0 ;;
+    *) break ;;  # Remaining args passed to psql in session mode
+  esac
+  shift
+done
+
+# ─── Helpers ──────────────────────────────────────────────
+log() { $VERBOSE && echo "[LOG] $1"; }
+
+run_step() {
+  local cmd="$1"
+  if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: $cmd"
+  else
+    log "Executing: $cmd"
+    eval "$cmd"
+  fi
+}
+
+# ─── Mode: ensure ─────────────────────────────────────────
+pgsql_ensure() {
+  SERVICE="postgresql"
+  echo "[pgsql] Ensuring PostgreSQL is running..."
+
+  if systemctl is-active --quiet "$SERVICE"; then
+    echo "[pgsql] PostgreSQL is already running."
+  else
+    echo "[pgsql] PostgreSQL is not running — starting..."
+    run_step "sudo systemctl start $SERVICE"
+    echo "[pgsql] PostgreSQL started."
+  fi
+}
+
+# ─── Mode: state ──────────────────────────────────────────
+pgsql_state() {
+  SERVICE="postgresql"
+  echo "[pgsql] Checking PostgreSQL state..."
+
+  if systemctl is-active --quiet "$SERVICE"; then
+    echo "[pgsql] PostgreSQL is already running."
+  else
+    echo "[pgsql] PostgreSQL is not running — starting..."
+    run_step "sudo systemctl start $SERVICE"
+    sleep 2
+    echo "[pgsql] PostgreSQL started."
+  fi
+}
+
+# ─── Mode: session ─────────────────────────────────────────
+pgsql_session() {
+  SERVICE="postgresql@18-main.service"
+
+  echo "[pgsql-session] Starting PostgreSQL for this session..."
+  run_step "sudo systemctl start $SERVICE"
+
+  echo "[pgsql-session] Launching psql..."
+  psql "$@"
+
+  echo "[pgsql-session] psql exited — stopping PostgreSQL..."
+  run_step "sudo systemctl stop $SERVICE"
+
+  echo "[pgsql-session] Session complete."
+}
+
+# ─── Main Logic ───────────────────────────────────────────
+main() {
+  case "$MODE" in
+    ensure) pgsql_ensure ;;
+    state) pgsql_state ;;
+    session) pgsql_session "$@" ;;
+    *)
+      echo "[!] Unknown mode: $MODE"
+      echo "Usage: $TOOL_NAME <ensure|state|session>"
+      exit 1 ;;
+  esac
+}
+
+main "$@"
+
+# ─── Logging ──────────────────────────────────────────────
+if $LOGGING && ! $DRY_RUN; then
+  mkdir -p "$(dirname "$LOGFILE")"
+  {
+    echo "=== $TOOL_NAME ==="
+    date
+    echo "Version: $VERSION"
+    echo "Mode: $MODE"
+    echo "Flags: DRY_RUN=$DRY_RUN VERBOSE=$VERBOSE LOGGING=$LOGGING HASHMAP=$HASHMAP"
+    echo "===================="
+  } >> "$LOGFILE"
+fi
+
+# ─── Hashmap ──────────────────────────────────────────────
+if $HASHMAP; then
+  mkdir -p "$HASHDIR"
+  date +"%Y-%m-%d %H:%M:%S" > "$TIMESTAMP"
+  sha256sum "$0" > "$HASHFILE"
+fi
