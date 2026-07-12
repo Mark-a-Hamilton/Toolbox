@@ -1,0 +1,128 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.07.12-00                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : Boot-up Analysis Tool                │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   ba [--dry-run] [--verbose] [--log] [--hashmap]
+#
+# Description:
+#   Performs a structured analysis of the Linux boot process,
+#   capturing systemd health, critical chain timing, job lists,
+#   and blame metrics. Outputs results to a log file for later
+#   AI-assisted diagnosis.
+#
+# Output Files:
+#   /var/log/ba.log                   (when --log is used)
+#   .hashmap/ba.hash                  (when --hashmap is used)
+#   .hashmap/ba.timestamp             (when --hashmap is used)
+#
+# End Help
+
+# ─── Metadata ─────────────────────────────────────────────
+TOOL_NAME="ba"
+VERSION="2026.07.12-00"
+
+LOGFILE="/var/log/${TOOL_NAME}.log"
+HASHDIR=".hashmap"
+HASHFILE="${HASHDIR}/${TOOL_NAME}.hash"
+TIMESTAMP="${HASHDIR}/${TOOL_NAME}.timestamp"
+
+# ─── Flags ────────────────────────────────────────────────
+DRY_RUN=false
+VERBOSE=false
+LOGGING=false
+HASHMAP=false
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --verbose) VERBOSE=true ;;
+    --log) LOGGING=true ;;
+    --hashmap) HASHMAP=true ;;
+    --help)
+        echo "Usage: $TOOL_NAME [--dry-run] [--verbose] [--log] [--hashmap]"
+        exit 0 ;;
+    *) echo "[!] Unknown argument: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# ─── Helpers ──────────────────────────────────────────────
+log() { $VERBOSE && echo "[LOG] $1"; }
+
+run_step() {
+  local cmd="$1"
+  if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: $cmd"
+  else
+    log "Executing: $cmd"
+    eval "$cmd"
+  fi
+}
+
+# ─── Main Logic ───────────────────────────────────────────
+main() {
+  log "Starting $TOOL_NAME version $VERSION"
+  echo "[*] Starting Boot Analysis..."
+
+  # Header
+  run_step "echo 'Boot Analysis @ $(date)' > $LOGFILE"
+
+  # User Manager Health Check
+  echo "[*] User Manager Health Check..."
+  run_step "echo -e '\nUser Manager Health Check...' >> $LOGFILE"
+  run_step "systemctl --no-pager status user@$(id -u).service >> $LOGFILE"
+
+  # Summary
+  echo "[*] Summary..."
+  run_step "echo -e '\nSummary...' >> $LOGFILE"
+  run_step "systemd-analyze --no-pager >> $LOGFILE"
+
+  # Critical Chain
+  echo "[*] Critical Chain..."
+  run_step 'echo -e "\nCritical Analysis...(Critical-Chain)\n" >> '"$LOGFILE"
+  run_step "systemd-analyze --no-pager critical-chain >> $LOGFILE"
+
+  # List Jobs
+  echo "[*] Listing Jobs..."
+  run_step 'echo -e "\nRunning Jobs...(List Jobs)\n" >> '"$LOGFILE"
+  run_step "systemctl --no-pager list-jobs >> $LOGFILE"
+
+  # Blame
+  echo "[*] Detailed Analysis (Blame)..."
+  run_step 'echo -e "\nDetailed Analysis...(Blame)\n" >> '"$LOGFILE"
+  run_step "systemd-analyze --no-pager blame >> $LOGFILE"
+
+  # Footer
+  run_step "echo -e '\nCompleted @ $(date)' >> $LOGFILE"
+  echo "[*] Completed. See $LOGFILE for results."
+}
+
+main
+
+# ─── Logging ──────────────────────────────────────────────
+if $LOGGING && ! $DRY_RUN; then
+  mkdir -p "$(dirname "$LOGFILE")"
+  echo "[*] Logging enabled → $LOGFILE"
+  {
+    echo "=== $TOOL_NAME ==="
+    date
+    echo "Version: $VERSION"
+    echo "Executed with flags: DRY_RUN=$DRY_RUN VERBOSE=$VERBOSE LOGGING=$LOGGING HASHMAP=$HASHMAP"
+    echo "===================="
+  } >> "$LOGFILE"
+fi
+
+# ─── Hashmap ──────────────────────────────────────────────
+if $HASHMAP; then
+  mkdir -p "$HASHDIR"
+  echo "[*] Generating traceability files..."
+  date +"%Y-%m-%d %H:%M:%S" > "$TIMESTAMP"
+  sha256sum "$0" > "$HASHFILE"
+  echo "[*] Timestamp → $TIMESTAMP"
+  echo "[*] Hash → $HASHFILE"
+fi
