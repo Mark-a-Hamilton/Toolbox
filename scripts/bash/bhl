@@ -1,0 +1,250 @@
+#!/bin/bash
+# ┌───────────────────────────────────────────────────────┐
+# │ Version        : 2026.07.12-00                        │
+# │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
+# │ Script Purpose : BloodHound + Neo4j Launcher          │
+# │ Package        : toolbox                              │
+# └───────────────────────────────────────────────────────┘
+#
+# Usage:
+#   bhl [--dry-run] [--verbose] [--log] [--hashmap]
+#       [--diagnose-only] [--no-browser]
+#
+# Description:
+#   Starts Neo4j, waits for service readiness, launches BloodHound,
+#   and optionally opens a Chromium-compatible browser. Includes
+#   diagnostic-only mode and full traceability.
+#
+# Output Files:
+#   /var/log/bhl.log                 (when --log is used)
+#   .hashmap/bhl.hash                (when --hashmap is used)
+#   .hashmap/bhl.timestamp           (when --hashmap is used)
+#
+# End Help
+
+# ─── Metadata ─────────────────────────────────────────────
+TOOL_NAME="bhl"
+VERSION="2026.07.12-00"
+
+LOGFILE="/var/log/${TOOL_NAME}.log"
+HASHDIR=".hashmap"
+HASHFILE="${HASHDIR}/${TOOL_NAME}.hash"
+TIMESTAMP="${HASHDIR}/${TOOL_NAME}.timestamp"
+
+# ─── Flags ────────────────────────────────────────────────
+DRY_RUN=false
+VERBOSE=false
+LOGGING=false
+HASHMAP=false
+DIAGNOSE_ONLY=false
+NO_BROWSER=false
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --verbose) VERBOSE=true ;;
+    --log) LOGGING=true ;;
+    --hashmap) HASHMAP=true ;;
+    --diagnose-only) DIAGNOSE_ONLY=true ;;
+    --no-browser) NO_BROWSER=true ;;
+    --help)
+        echo "Usage: $TOOL_NAME [--dry-run] [--verbose] [--log] [--hashmap] [--diagnose-only] [--no-browser]"
+        exit 0 ;;
+    *) echo "[!] Unknown argument: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# ─── Helpers ──────────────────────────────────────────────
+log() { $VERBOSE && echo "[LOG] $1"; }
+
+run_step() {
+  local cmd="$1"
+  if $DRY_RUN; then
+    echo "[DRY-RUN] Would execute: $cmd"
+  else
+    log "Executing: $cmd"
+    eval "$cmd"
+  fi
+}
+
+# ─── Root Check ───────────────────────────────────────────
+if [[ $EUID -ne 0 ]]; then
+  echo "[!] This tool must be run as root. Try: sudo bhl"
+  exit 1
+fi
+
+# ─── Internal Config ──────────────────────────────────────
+BLOODHOUND_CMD="bloodhound"
+CHROMIUM_CMD=""
+NEO4J_PORT=7474
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_HASH="$(sha256sum "$SCRIPT_PATH" | awk '{print $1}')"
+
+# ─── Browser Detection ────────────────────────────────────
+detect_browser() {
+  if command -v chromium >/dev/null 2>&1; then
+    CHROMIUM_CMD="chromium"
+  elif command -v chromium-browser >/dev/null 2>&1; then
+    CHROMIUM_CMD="chromium-browser"
+  else
+    CHROMIUM_CMD=""
+    echo "No Chromium-compatible browser found."
+  fi
+}
+
+# ─── Neo4j Start ──────────────────────────────────────────
+start_neo4j() {
+  echo "[*] Starting Neo4j..."
+  local NEO4J_BIN="/usr/bin/neo4j"
+
+  if [ ! -x "$NEO4J_BIN" ]; then
+    echo "[!] Neo4j binary not found at $NEO4J_BIN"
+    return 1
+  fi
+
+  run_step "nohup $NEO4J_BIN console >/dev/null 2>&1 &"
+  sleep 2
+}
+
+wait_for_neo4j() {
+  local max_attempts=15
+  local attempt=1
+
+  while (( attempt <= max_attempts )); do
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$NEO4J_PORT")
+
+    $VERBOSE && echo "[LOG] Neo4j HTTP code: $HTTP_CODE"
+
+    if [[ "$HTTP_CODE" =~ ^(200|302|401)$ ]]; then
+      echo "[*] Neo4j responsive after $attempt attempt(s)."
+      return 0
+    fi
+
+    echo "[*] Waiting for Neo4j... ($attempt/$max_attempts)"
+    sleep 3
+    (( attempt++ ))
+  done
+
+  echo "[!] Neo4j failed to respond."
+  return 1
+}
+
+# ─── Browser Launch ───────────────────────────────────────
+launch_browser() {
+  if $NO_BROWSER; then
+    echo "[*] Browser launch skipped (--no-browser)"
+    return 0
+  fi
+
+  if [ -n "$CHROMIUM_CMD" ]; then
+    echo "[*] Launching Chromium..."
+    run_step "sudo -u $SUDO_USER $CHROMIUM_CMD \"http://localhost:$NEO4J_PORT\" &"
+  else
+    echo "[!] No compatible browser found."
+  fi
+}
+
+# ─── BloodHound Start ─────────────────────────────────────
+start_bloodhound() {
+  echo "[*] Starting BloodHound..."
+  if command -v $BLOODHOUND_CMD >/dev/null 2>&1; then
+    run_step "$BLOODHOUND_CMD &"
+    sleep 5
+    echo "[*] BloodHound launched."
+  else
+    echo "[!] BloodHound not found in PATH."
+    return 1
+  fi
+}
+
+# ─── Diagnostics ──────────────────────────────────────────
+check_port_conflict() {
+  local PORT=$1
+  echo "[*] Checking port $PORT..."
+
+  local CONFLICT=$(lsof -i :$PORT | grep LISTEN)
+
+  if [ -n "$CONFLICT" ]; then
+    echo "$CONFLICT"
+    local PID=$(echo "$CONFLICT" | awk '{print $2}')
+    echo "[*] Killing PID $PID..."
+    kill "$PID" || echo "[!] Failed to terminate PID $PID"
+    sleep 2
+  else
+    echo "[*] No conflict on port $PORT."
+  fi
+}
+
+diagnose_neo4j() {
+  echo "=== Neo4j Diagnostic ==="
+  echo "Timestamp: $(date)"
+  echo "Script SHA256: $SCRIPT_HASH"
+
+  echo "[1] Checking Neo4j process..."
+  pgrep -af neo4j || echo "Neo4j not running."
+
+  echo "[2] Neo4j version..."
+  neo4j --version || echo "Neo4j binary missing."
+
+  echo "[3] Port conflict check..."
+  check_port_conflict $NEO4J_PORT
+
+  echo "[4] Config settings..."
+  CONF_PATH="/etc/neo4j/neo4j.conf"
+  if [ -f "$CONF_PATH" ]; then
+    grep -E 'dbms.default_listen_address|dbms.connector.http.listen_address' "$CONF_PATH"
+  else
+    echo "Config not found."
+  fi
+
+  echo "=== Diagnostic Complete ==="
+}
+
+# ─── Main Logic ───────────────────────────────────────────
+main() {
+  echo "[*] BloodHound Launch Sequence Initiated"
+  echo "[*] Script SHA256: $SCRIPT_HASH"
+
+  detect_browser
+
+  if $DIAGNOSE_ONLY; then
+    echo "[*] Diagnose-only mode"
+    diagnose_neo4j
+    exit 0
+  fi
+
+  start_neo4j
+
+  if wait_for_neo4j; then
+    launch_browser
+    start_bloodhound
+    echo "[*] Launch complete."
+  else
+    diagnose_neo4j
+    echo "[!] Neo4j failed to start. Aborting."
+    exit 1
+  fi
+}
+
+main
+
+# ─── Logging ──────────────────────────────────────────────
+if $LOGGING && ! $DRY_RUN; then
+  mkdir -p "$(dirname "$LOGFILE")"
+  {
+    echo "=== $TOOL_NAME ==="
+    date
+    echo "Version: $VERSION"
+    echo "Flags: DRY_RUN=$DRY_RUN VERBOSE=$VERBOSE LOGGING=$LOGGING HASHMAP=$HASHMAP DIAGNOSE_ONLY=$DIAGNOSE_ONLY NO_BROWSER=$NO_BROWSER"
+    echo "===================="
+  } >> "$LOGFILE"
+fi
+
+# ─── Hashmap ──────────────────────────────────────────────
+if $HASHMAP; then
+  mkdir -p "$HASHDIR"
+  date +"%Y-%m-%d %H:%M:%S" > "$TIMESTAMP"
+  sha256sum "$0" > "$HASHFILE"
+fi
+ 
