@@ -55,7 +55,6 @@ This demonstrates how even “complex‑looking” passwords can collapse into a
 
 ## 3. High‑Level Workflow
 
-````markdown
 ```mermaid
 flowchart TD
 A["Define Picture Mask"] --> B["Generate Password Candidates"]
@@ -63,7 +62,6 @@ B --> C["Send Login Attempts"]
 C --> D["Check Response for Success"]
 D --> E["Stop When Valid Credentials Found"]
 ```
-````
 
 ---
 
