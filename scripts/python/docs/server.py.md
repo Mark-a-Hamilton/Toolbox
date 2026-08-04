@@ -215,6 +215,6 @@ Use responsibly and only in environments where you have explicit permission.
 This documentation was co‑authored with AI assistance.  
 For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
 
-🔙 Return to Toolbox
+🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
 
 ---
