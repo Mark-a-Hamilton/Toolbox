@@ -1,9 +1,3 @@
-Below is your full **Markdown documentation page** for `db-report.py`, written in the *exact same structure, tone, formatting, and educational style* as your `bf` example — but tailored precisely to the functionality of this tool.
-
-It reads like a professional Toolbox module page, consistent with your architecture, flags, metadata, and educational purpose.
-
----
-
 # 📘 **db-report.py — Database Vulnerability Report Generator**
 
 ## 1. Introduction
