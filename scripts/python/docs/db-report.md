@@ -45,7 +45,6 @@ It reinforces both **attacker workflow literacy** and **defensive reporting skil
 
 ## 3. High‑Level Workflow
 
-````markdown
 ```mermaid
 flowchart TD
 A["Run db-tool.py or similar"] --> B["Collect Findings"]
@@ -54,7 +53,6 @@ C --> D["Select Report Type (management/technical)"]
 D --> E["Generate HTML Report"]
 E --> F["Write Logs & Hashmap (optional)"]
 ```
-````
 
 ---
 
