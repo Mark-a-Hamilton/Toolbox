@@ -1,6 +1,6 @@
 #!/bin/bash
 # ┌───────────────────────────────────────────────────────┐
-# │ Version        : 2026.02.10-01                        │
+# │ Version        : 2026.07.27-00                        │
 # │ Author         : Mark Hamilton │ Co-Pilot AI assisted │
 # │ Script Purpose : System Update & Locate DB Refresh    │
 # │ Package        : toolbox                              │
@@ -49,7 +49,8 @@ done
 # ─────────────────────────────────────────────────────────────
 steps=(
     "apt update"
-    "apt upgrade -y"
+    "apt --fix-broken install"
+    "apt full-upgrade"
     "apt autoremove -y"
     "apt clean"
 )
@@ -105,3 +106,4 @@ if $HASHMAP; then
 fi
 
 echo "🎉 Update complete."
+                     
