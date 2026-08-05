@@ -1,6 +1,6 @@
 #!/bin/bash
 # ┌────────────────────────────────────────────────────────┐
-# │ Type / Version  : 2026.02.14-01                        │
+# │ Version         : 2026.02.14-01                        │
 # │ Author          : Mark Hamilton & Copilot AI assisted  │
 # │ Script Purpose  : Remote transfer + execution utility  │
 # │ Package         : toolbox                              │
@@ -153,3 +153,4 @@ case "$CMD" in
         exit 1
         ;;
 esac
+             
