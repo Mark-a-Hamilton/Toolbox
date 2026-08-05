@@ -1,105 +1,131 @@
- # 🔄 update
+# 📘 **update — System Update & Locate DB Refresh Tool**
 
-`update` is a modular system‑update utility within the Toolbox suite.  
-It performs a full package refresh using `apt`, followed by a locate‑database rebuild for accurate file indexing. The tool supports dry‑run simulation, logging, and hash‑based traceability.
+## 1. Introduction
+
+`update` is a Toolbox module that performs a **complete system update** using APT, followed by a refresh of the system’s locate database. It is designed for authorised administrative use and provides a clean, reproducible workflow for maintaining system health.
+
+It performs:
+
+- full APT update + upgrade sequence  
+- dependency repair via `--fix-broken`  
+- autoremove + cache clean  
+- locate database refresh (`updatedb`)  
+- optional logging  
+- optional hash‑based traceability  
+- dry‑run simulation mode  
+
+This tool is ideal for:
+
+- daily maintenance  
+- lab machine upkeep  
+- PrivEsc training environments  
+- reproducible update workflows  
 
 ---
 
-## 🎯 Purpose
+## 2. Usage
 
-`update` simplifies and standardises system maintenance by:
-
-- Running `apt update`, `apt upgrade`, `apt autoremove`, and `apt clean`  
-- Refreshing the locate database (`updatedb`)  
-- Supporting dry‑run mode for safe previewing  
-- Logging update actions with timestamps  
-- Generating SHA‑256 hashes for audit traceability  
-
-It provides a predictable, operator‑grade workflow for Debian‑based systems.
-
----
-
-## 🧪 Usage
-
-### Basic Update
 ```bash
-sudo update
+sudo update [--dry-run] [--log] [--hashmap]
 ```
 
-### Dry‑Run Mode
+### Examples
+
 ```bash
 sudo update --dry-run
-```
-Simulates all update steps without making changes.
-
-### Logging Mode
-```bash
 sudo update --log
+sudo update --hashmap
 ```
-Writes update actions to:
+
+---
+
+## 3. Features
+
+### 🔄 Full APT Update Workflow  
+Runs a complete update sequence:
+
+- `apt update`  
+- `apt --fix-broken install`  
+- `apt full-upgrade`  
+- `apt autoremove -y`  
+- `apt clean`  
+
+Ensures the system is fully upgraded and free of obsolete packages.
+
+### 📚 Locate Database Refresh  
+Runs `updatedb --verbose` and verifies freshness via:
+
+```
+stat -c '%y %n' /var/lib/plocate/plocate.db
+```
+
+Ensures accurate file indexing for `locate`.
+
+### 🧪 Dry‑Run Mode  
+Simulates all update steps without executing them — ideal for testing or CI pipelines.
+
+### 📝 Logging  
+Writes update steps and locate refresh output to:
+
 ```
 /var/log/update.log
 ```
 
-### Hash‑Based Audit Mode
-```bash
-sudo update --hashmap
-```
-Creates:
-```
-.hashmap/update.hash
-.hashmap/update.timestamp
-```
+### 🗂️ Hashmap Traceability  
+Generates:
+
+- `.hashmap/update.hash` — SHA‑256 fingerprint of the script  
+- `.hashmap/update.timestamp` — execution timestamp  
+
+Supports reproducible debugging and audit trails.
 
 ---
 
-## 🧩 Parameters
+## 4. Flags
 
-| Flag         | Description                                      |
-|--------------|--------------------------------------------------|
-| `--dry-run`  | Simulates update steps without executing         |
-| `--log`      | Logs actions to `/var/log/update.log`            |
-| `--hashmap`  | Stores script hash and timestamp in `.hashmap/`  |
-| `--help`     | Displays usage instructions                      |
+- **`--dry-run`** — simulate execution without running commands  
+- **`--log`** — write results to `/var/log/update.log`  
+- **`--hashmap`** — generate traceability artefacts  
 
 ---
 
-## 🔧 Steps Performed
+## 5. Output
 
-| Command                   | Description                                      |
-|---------------------------|--------------------------------------------------|
-| `apt update`              | Refreshes package lists                          |
-| `apt upgrade -y`          | Installs available updates                       |
-| `apt autoremove -y`       | Removes unused dependencies                      |
-| `apt clean`               | Clears cached package data                       |
-| `updatedb --verbose`      | Rebuilds the locate database                     |
-| `stat /var/lib/plocate/plocate.db` | Verifies database freshness            |
+### 📄 Log File  
+`/var/log/update.log`  
+Contains:
 
----
+- executed update steps  
+- locate database refresh output  
+- timestamped summary block  
 
-## 📁 Output Files
+### 🧾 Hashmap Files  
+Stored in `.hashmap/`:
 
-| File Path                     | Purpose                          |
-|-------------------------------|----------------------------------|
-| `/var/log/update.log`         | Timestamped update log           |
-| `.hashmap/update.hash`        | SHA‑256 hash of the script       |
-| `.hashmap/update.timestamp`   | Timestamp of update execution    |
-
-All output locations are displayed during execution.
+- `update.hash` — SHA‑256 hash of the script  
+- `update.timestamp` — execution timestamp  
 
 ---
 
-## 📢 Disclaimer
+## 6. Educational Notes
 
-This tool performs **standard system maintenance only**.  
-It does **not** perform scanning, enumeration, or offensive actions.  
-Use responsibly and only in environments where you have explicit permission.
+This tool demonstrates how **system maintenance automation** can be structured cleanly using Bash:
+
+- ordered update sequences  
+- dependency repair  
+- cache cleanup  
+- locate database refresh  
+- reproducible traceability  
+
+It is intentionally minimal and ideal for teaching system maintenance workflows.
 
 ---
 
-## 🤖 AI & Ethics Disclosure
+## 7. Closure
 
 This tool and its documentation were co‑authored with AI assistance.  
-For details on responsible use, transparency, and authorship, see the **AI & Ethics** section in the Toolbox README.
+For responsible use, authorship transparency, and ethical notes, see the Toolbox README.
 
-🔙 Return to [Toolbox](https://github.com/Mark-a-Hamilton/Toolbox)
+🔙 Return to **Toolbox**
+
+---
